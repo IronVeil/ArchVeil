@@ -342,17 +342,17 @@ while true; do
     read -p "(1-3) " choice
 
     # linux
-    if [ choice == 1 ]; then
+    if [ choice == "1" ]; then
         package_kernel="linux linux-headers"
         break
 
     # linux-lts
-    elif [ choice == 2 ]; then
+    elif [ choice == "2" ]; then
         package_kernel="linux-lts linux-lts-headers"
         break
 
     # linux-zen
-    elif [ choice == 3 ]; then
+    elif [ choice == "3" ]; then
         package_kernel="linux-zen linux-zen-headers"
     fi
 done
