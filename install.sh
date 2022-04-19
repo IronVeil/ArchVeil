@@ -33,6 +33,7 @@ while true; do
         config_vm=false
         break
     fi
+done
 
 
 
