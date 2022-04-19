@@ -365,12 +365,38 @@ done
 # Get cpu
 cpu=($(cat /proc/cpuinfo | grep 'model name' | uniq))
 
-# Intel
+# AMD
 if [[ $cpu == *"AMD"* ]]; then
     package_microcode="amd-ucode"
+
+# Intel
 elif [[ $cpu == *"Intel"* ]]; then
     package_microcode="intel-ucode"
 fi
+
+
+## Bootloader
+echo
+echo "Do you want systemd-boot or GRUB?"
+
+while true; do
+	
+	# User input
+	read -p "(S/G) " config_bootloader
+	config_bootloader=${config_bootloader,,}
+
+	# systemd-boot
+	if [ $config_bootloader == "s" ]; then
+		config_bootloader="systemd-boot"
+		break
+
+	# GRUB
+	elif [ $config_bootloader == "g" ]; then
+		config_bootloader="grub"
+		package_bootloader="grub efibootmgr os-prober"
+		break
+	fi
+done
 
 
 ## Checking
@@ -379,6 +405,7 @@ echo "Is this all correct?"
 
 echo "KERNEL=$package_kernel"
 echo "MICROCODE=$package_microcode"
-
+echo "BOOTLOADER=$package_bootloader"
+echo
 
 confirm
