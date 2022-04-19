@@ -300,11 +300,11 @@ while true; do
 
     # GRUB
     elif [ $package_bootloader == "2" ]; then
-        $packages+="grub os-prober"
+        packages+="grub os-prober"
 
         # EFI
         if [ $partition_layout == "efi" ]; then
-            $packages+="efibootmgr"
+            packages+="efibootmgr"
         fi
 
         break
