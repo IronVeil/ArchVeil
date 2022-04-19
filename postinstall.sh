@@ -1,1 +1,1 @@
-echo "YUHHFJDBSNFBSFJHBSFJHBSFHHhsdfhfhdfh"
+echo $package_kernel

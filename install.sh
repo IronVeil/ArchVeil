@@ -540,4 +540,4 @@ cp ./postinstall.sh /mnt/postinstall.sh
 chmod +x /mnt/postinstall.sh
 
 # Run script
-arch-chroot /mnt ./postinstall.sh
+arch-chroot /mnt (. ./postinstall.sh)
