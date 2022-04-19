@@ -393,6 +393,9 @@ while true; do
     fi
 done
 
+# Export to file
+sed =i "s/system_kernel=/system_kernel=$system_kernel/" ./settings.sh
+
 
 ## Bootloader
 echo
@@ -418,9 +421,30 @@ while true; do
             packages+=" efibootmgr"
         fi
 
+        ## Timeout
+        echo
+        echo "Do you want a 5 second delay to select other operating systems?"
+
+        while true; do
+            read -p "(Y/N) " system_grub_delay
+            system_grub_delay=${system_grub_delay,,}
+
+            # Delay
+            if [ $system_grub_delay == "y" ]; then
+                system_grub_delay=true
+                break
+            elif [ $system_grub_delay == "n" ]; then
+                system_grub_delay=false
+                break
+            fi
+        done
+
         break
     fi
 done
+
+# Export to file
+sed -i "s/system_grub_delay=.*/system_grub_delay=$system_grub_delay/" ./settings.sh
 
 
 ## BTRFS

@@ -8,6 +8,7 @@ system_user_autologin=
 system_pass=
 system_root_pass=
 system_kernel=
+system_grub_delay=
 
 # DISK
 disk_name=

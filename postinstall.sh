@@ -108,7 +108,7 @@ useradd -mG wheel $system_user
 echo -e "$system_pass\n$system_pass" | passwd $system_user
 
 # Autologin
-if [ system_user_autologin == "true" ]; then
+if [ $system_user_autologin == "true" ]; then
     echo
     echo "------ Setting up autologin for $system_user"
 
@@ -127,8 +127,35 @@ echo -e "$system_root_pass\n$system_root_pass" | passwd root
 
 
 
+### --- SERVICES ---
+echo
+echo "------ Enabling services"
+
+
+## Networking
+if [[ $packages == *"networkmanager"* ]]; then
+    systemctl enable NetworkManager
+fi
+
+# DHCPCD
+systemctl enable dhcpcd
+
+
+
 ### --- BOOTLOADER ---
+echo
+echo "------ Installing bootloader"
+
+## GRUB
 if [[ $packages == *"grub"* ]]; then
+
+    # Enable os-prober
+    sed -i "63s/#//" /etc/default/grub
+
+    # Toggle delay
+    if [ $system_grub_delay == "true" ]; then
+        sed -i "4s/5/0/" /etc/default/grub
+    fi
 
     # EFI
     if [ $partition_layout == "efi" ]; then
@@ -136,7 +163,13 @@ if [[ $packages == *"grub"* ]]; then
         # Install
         grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 
-        # Config
-        grub-mkconfig -o /boot/grub/grub.cfg
+    # BIOS
+    elif [ $partition_layout == "bios" ]; then
+        
+        # Install
+        grub-install --target=i386-pc $disk_dir
     fi
+
+    # Config
+    grub-mkconfig -o /boot/grub/grub.cfg
 fi
