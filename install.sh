@@ -339,20 +339,23 @@ echo "3) linux-zen"
 while true; do
 
     # User input
-    read -p "(1-3) " choice
+    read -p "(1-3) " config_kernel
 
     # linux
-    if [ $choice == "1" ]; then
+    if [ $config_kernel == "1" ]; then
+        config_kernel="linux"
         package_kernel="linux linux-headers"
         break
 
     # linux-lts
-    elif [ $choice == "2" ]; then
+    elif [ $config_kernel == "2" ]; then
+        config_kernel="linux-lts"
         package_kernel="linux-lts linux-lts-headers"
         break
 
     # linux-zen
-    elif [ $choice == "3" ]; then
+    elif [ $config_kernel == "3" ]; then
+        config_kernel="linux-zen"
         package_kernel="linux-zen linux-zen-headers"
         break
 
@@ -484,6 +487,9 @@ if [ $config_gui == true ]; then
 		# GNOME
 		if [ $config_desktop == "1" ]; then
 			package_desktop="gnome gdm gnome-terminal nautilus python-nautilus"
+            break
+
+		# Plasma
 		elif [ $config_desktop == "2" ]; then
 
 			# Wayland
@@ -494,6 +500,8 @@ if [ $config_gui == true ]; then
 			else
 				package_desktop="plasma dolphin konsole"
 			fi
+
+            break
 		fi
 	done
 fi
