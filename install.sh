@@ -326,6 +326,7 @@ if [ $config_vm == true ]; then
     package_base="base base-devel"
 else
     package_base="base base-devel linux-firmware"
+fi
 
 
 ## Kernel
@@ -354,6 +355,7 @@ while true; do
     elif [ choice == 3 ]; then
         package_kernel="linux-zen linux-zen-headers"
     fi
+done
 
 
 ## Microcode
