@@ -4,7 +4,7 @@
 system_vm=
 system_hostname=
 system_user=
-system_pass
+system_pass=
 system_root_pass=
 system_kernel=
 

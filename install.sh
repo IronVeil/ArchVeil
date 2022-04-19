@@ -160,6 +160,8 @@ genfstab -U /mnt >> /mnt/etc/fstab
 # Movement
 cp ./settings.sh /mnt/
 cp ./postinstall.sh /mnt/
+chmod +x /mnt/postinstall.sh
+
 
 # Use script
 arch-chroot /mnt ./postinstall.sh
