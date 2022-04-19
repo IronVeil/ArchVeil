@@ -2,6 +2,7 @@
 
 # SYSTEM
 system_vm=
+system_cpu=
 system_hostname=
 system_user=
 system_user_autologin=

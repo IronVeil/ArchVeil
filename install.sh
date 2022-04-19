@@ -134,6 +134,25 @@ else
     mount $partition_root /mnt
 fi
 
+
+## Microcode
+
+# CPU
+cpu=$(grep -m 1 'model name' /proc/cpuinfo)
+
+# AMD
+if [[ $cpu == *"AMD"* ]]; then
+    system_cpu="amd"
+
+# Intel
+elif [[ $cpu == *"Intel"* ]]; then
+    system_cpu="intel"
+fi
+
+# Export to file
+sed -i "s/system_cpu=.*/system_cpu=$system_cpu/" ./settings.sh
+
+
 ## Boot
 if [ $partition_layout == "efi" ]; then
 
@@ -159,6 +178,7 @@ pacstrap /mnt $packages
 
 ## fstab
 genfstab -U /mnt >> /mnt/etc/fstab
+
 
 ## Post-install script
 
