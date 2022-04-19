@@ -16,6 +16,21 @@ echo -ne "
 "
 
 
+## Confirmation
+confirm () {
+    while true; do
+        read -p "(Y/N) " confirm
+        confirm=${confirm,,}
+
+        if [ $confirm == "y" ]; then
+            break
+        elif [ $confirm == "n" ]; then
+            exit
+        fi
+    done
+}
+
+
 ## VM
 echo
 echo "Is this a VM?"
@@ -200,17 +215,8 @@ fi
 
 echo
 
-# Confirmation
-while true; do
-    read -p "(Y/N) " confirm
-    confirm=${confirm,,}
-
-    if [ $confirm == "y" ]; then
-        break
-    elif [ $confirm == "n" ]; then
-        exit
-    fi
-done
+# Confirm
+confirm
 
 
 ## Partitioning
@@ -315,4 +321,60 @@ echo -ne "
 ------------------------------------------------------------------
 "
 
-#
+# Base
+if [ $config_vm == true ]; then
+    package_base="base base-devel"
+else
+    package_base="base base-devel linux-firmware"
+
+
+## Kernel
+echo
+echo "What kernel do you want?"
+echo "1) linux"
+echo "2) linux-lts"
+echo "3) linux-zen"
+
+while true; do
+
+    # User input
+    read -p "(1-3) " choice
+
+    # linux
+    if [ choice == 1 ]; then
+        package_kernel="linux linux-headers"
+        break
+
+    # linux-lts
+    elif [ choice == 2 ]; then
+        package_kernel="linux-lts linux-lts-headers"
+        break
+
+    # linux-zen
+    elif [ choice == 3 ]; then
+        package_kernel="linux-zen linux-zen-headers"
+    fi
+
+
+## Microcode
+
+# Get cpu
+cpu=($(cat /proc/cpuinfo | grep 'model name' | uniq))
+
+# Intel
+if [[ cpu == *"AMD"* ]]; then
+    package_microcode="amd-ucode"
+elif [[ cpu == *"Intel"* ]]; then
+    package_microcode="intel-ucode"
+fi
+
+
+## Checking
+echo
+echo "Is this all correct?"
+
+echo "KERNEL=$package_kernel"
+echo "MICROCODE=$package_microcode"
+
+
+confirm
