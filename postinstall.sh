@@ -107,6 +107,16 @@ echo "------ Setting up $system_user"
 useradd -mG wheel $system_user
 echo -e "$system_pass\n$system_pass" | passwd $system_user
 
+# Autologin
+if [ system_user_autologin == "true" ]; then
+    echo
+    echo "------ Setting up autologin for $system_user"
+
+    mkdir -p /etc/systemd/system/getty@tty1.service.d
+    echo "[Service]" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo 'ExecStart=-/sbin/agetty -o "-p -f -- \\u" --noclear --autologin username - $TERM' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+
 
 ## Root
 echo

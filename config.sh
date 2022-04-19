@@ -83,6 +83,32 @@ while true; do
 done
 
 
+## Autologin
+echo
+echo "Do you want $system_user to autologin?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " system_user_autologin
+    system_user_autologin=${system_user_autologin,,}
+
+    # Autologin
+    if [ $system_user_autologin == "y" ]; then
+        system_user_autologin=true
+        break
+
+    # Manual login
+    else
+        system_user_autologin=false
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/system_user_autologin=.*/system_user_autologin=$system_user_autologin/" ./settings.sh
+
+
 ## Root password
 echo
 echo "Do you want the root password to be the same as the user password?"
