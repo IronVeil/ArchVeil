@@ -61,5 +61,5 @@ sed -i "s/#VerbosePkgLists/VerbosePkgLists/" /etc/pacman.conf
 sed -i "s/#ParallelDownloads = 5/ParallelDownloads = 7/" /etc/pacman.conf
 
 # Multilib
-sed -i "91,94s~#[multilib]~[multilib]~" /etc/pacman.conf
+sed -i "94s~#~~" /etc/pacman.conf
 sed -i "92,95s~#Include = /etc/pacman.d/mirrorlist~Include = /etc/pacman.d/mirrorlist~" /etc/pacman.conf
