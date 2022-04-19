@@ -411,12 +411,12 @@ while true; do
 
 	# NetworkManager
 	if [ $config_networkmanager == "y" ]; then
-		$package_internet="dhcpcd networkmanager"
+		package_internet="dhcpcd networkmanager"
 		break
 	
 	# Ethernet
 	elif [ $config_networkmanager == "n" ]; then
-		$package_internet="dhcpcd"
+		package_internet="dhcpcd"
 		break
 	fi
 done
@@ -483,16 +483,16 @@ if [ $config_gui == true ]; then
 		
 		# GNOME
 		if [ $config_desktop == "1" ]; then
-			$package_desktop="gnome gdm gnome-terminal nautilus python-nautilus"
+			package_desktop="gnome gdm gnome-terminal nautilus python-nautilus"
 		elif [ $config_desktop == "2" ]; then
 
 			# Wayland
 			if [ $config_displaybackend == "w" ]; then
-				$package_desktop="plasma dolphin konsole plasma-wayland-session"
+				package_desktop="plasma dolphin konsole plasma-wayland-session"
 
 			# X.ORG
 			else
-				$package_desktop="plasma dolphin konsole"
+				package_desktop="plasma dolphin konsole"
 			fi
 		fi
 	done
