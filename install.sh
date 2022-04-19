@@ -456,7 +456,7 @@ if [ $config_gui == true ]; then
 	while true; do
 
 		# User input
-		read -p "(X,W) " config_displaybackend
+		read -p "(X/W) " config_displaybackend
 		config_displaybackend=${config_displaybackend,,}
 
 		# X.ORG
@@ -520,3 +520,11 @@ echo "DESKTOP=$package_desktop"
 echo
 
 confirm
+
+
+## Installing
+echo
+echo "--- Installing packages"
+
+# Pacstrap
+pacstrap /mnt $package_base $package_kernel $package_microcode $package_bootloader $package_internet $package_displaybackend $package_desktop
