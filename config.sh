@@ -243,9 +243,9 @@ sed -i "s/partition_root_format=.*/partition_root_format=$partition_root_format/
 
 ## Base
 if [ $system_vm == "true" ]; then
-    package_base="base base-devel"
+    packages+="base base-devel"
 else
-    package_base="base base-devel linux-firmware"
+    packages+="base base-devel linux-firmware"
 fi
 
 
@@ -263,26 +263,56 @@ while true; do
 
     # linux
     if [ $package_kernel == "1" ]; then
-        package_kernel="linux linux-headers"
+        packages+="linux linux-headers"
         system_kernel="linux"
         break
     
     # linux-lts
     elif [ $package_kernel == "2" ]; then
-        package_kernel="linux-lts linux-lts-headers"
+        packages+="linux-lts linux-lts-headers"
         system_kernel="linux-lts"
         break
     
     # linux-zen
     elif [ $package_kernel == "3" ]; then
-        package_kernel="linux-zen linux-zen-headers"
+        packages+="linux-zen linux-zen-headers"
         system_kernel="linux-zen"
         break
     fi
 done
 
+
+## Bootloader
+echo
+echo "Which bootloader do you want?"
+echo "1) systemd-boot"
+echo "2) GRUB"
+
+while true; do
+
+    # User input
+    read -p "(1/2) " package_bootloader
+
+    # systemd-boot
+    if [ $package_bootloader == "1" ]; then
+        system_bootloader="systemd-boot"
+        break
+
+    # GRUB
+    elif [ $package_bootloader == "2" ]; then
+        $packages+="grub os-prober"
+
+        # EFI
+        if [ $partition_layout == "efi" ]; then
+            $packages+="efibootmgr"
+        fi
+
+        break
+    fi
+done
+
 ## Export to file
-sed -i "s/packages=.*/packages='$package_base $package_kernel'/" ./settings.sh
+sed -i "s/packages=.*/packages='$packages'/" ./settings.sh
 
 ### --- INSTALL ---
 ./install.sh
