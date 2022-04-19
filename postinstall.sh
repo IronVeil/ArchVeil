@@ -95,3 +95,19 @@ sed -i "138s/bzip2/pbzip2/" /etc/makepkg.conf
 sed -i "139s/-z -/-z --threads=0 -/" /etc/makepkg.conf
 sed -i "140s/-q -/-q --threads=0 -/" /etc/makepkg.conf
 sed -i "151s/.zst//" /etc/makepkg.conf
+
+
+
+### --- BOOTLOADER ---
+if [ $system_bootloader == "grub" ]; then
+
+    # EFI
+    if [ $partition_layout == "efi" ]; then
+
+        # Install
+        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+
+        # Config
+        grub-mkconfig -o /boot/grub/grub.cfg
+    fi
+fi

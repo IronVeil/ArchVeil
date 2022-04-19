@@ -7,6 +7,7 @@ system_user=
 system_pass=
 system_root_pass=
 system_kernel=
+system_bootloader=
 
 # DISK
 disk_name=

@@ -350,6 +350,7 @@ while true; do
 
     # GRUB
     elif [ $package_bootloader == "2" ]; then
+        system_bootloader="grub"
         packages+=" grub os-prober"
 
         # EFI
@@ -360,6 +361,9 @@ while true; do
         break
     fi
 done
+
+# Export to file
+sed -i "s/system_bootloader/system_bootloader=$system_bootloader/" ./settings.sh
 
 
 ## BTRFS
