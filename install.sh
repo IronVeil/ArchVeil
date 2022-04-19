@@ -16,6 +16,26 @@ echo -ne "
 "
 
 
+## VM
+echo
+echo "Is this a VM?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " config_vm
+    config_vm=${config_vm,,}
+
+    if [ $config_vm == "y" ]; then
+        config_vm=true
+        break
+    elif [ $config_vm == "n" ]; then
+        config_vm=false
+        break
+    fi
+
+
+
 ### --- DISKS ---
 
 echo -ne "
@@ -28,6 +48,7 @@ echo -ne "
 
 # Get current disks
 disks=($(lsblk -n --output TYPE,KNAME | awk '$1=="disk"{print "/dev/"$2}'))
+
 
 ## Selection
 echo
@@ -155,6 +176,7 @@ done
 echo
 echo "Is this all correct?"
 
+echo "VM=$config_vm"
 echo "DISK=$disk_dir"
 
 if [ $disk_layout = "e" ]; then
@@ -280,3 +302,16 @@ if [ $disk_layout == "e" ]; then
     # Mount
     mount $disk_partition_boot /mnt/boot
 fi
+
+
+
+### --- PACKAGES ---
+echo -ne "
+------------------------------------------------------------------
+
+                      Installing Packages
+
+------------------------------------------------------------------
+"
+
+#
