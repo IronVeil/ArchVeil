@@ -10,233 +10,62 @@ echo -ne "
 |   ██║██║  ██║╚██████╔╝██║ ╚████║ ╚████╔╝ ███████╗██║███████╗   |
 |   ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝  ╚═══╝  ╚══════╝╚═╝╚══════╝   |
 |                                                                |
-|                       Install Script                           |
+|                        Install Script                          |
 |                                                                |
 |----------------------------------------------------------------|
 "
 
 
-## Confirmation
-confirm () {
-    while true; do
-        read -p "(Y/N) " confirm
-        confirm=${confirm,,}
-
-        if [ $confirm == "y" ]; then
-            break
-        elif [ $confirm == "n" ]; then
-            exit
-        fi
-    done
-}
+### --- VARIABLES ---
+source ./settings.sh
 
 
-## VM
+
+### --- CONFIRMATION ---
 echo
-echo "Is this a VM?"
-
-while true; do
-
-    # User input
-    read -p "(Y/N) " config_vm
-    config_vm=${config_vm,,}
-
-    if [ $config_vm == "y" ]; then
-        config_vm=true
-        break
-    elif [ $config_vm == "n" ]; then
-        config_vm=false
-        break
-    fi
-done
-
-
-
-### --- DISKS ---
-
-echo -ne "
-------------------------------------------------------------------
-
-                      Partitioning Disks
-
-------------------------------------------------------------------
-"
-
-# Get current disks
-disks=($(lsblk -n --output TYPE,KNAME | awk '$1=="disk"{print "/dev/"$2}'))
-
-
-## Selection
+echo "Summary:"
 echo
-echo "Which disk do you want to install to?"
+echo "Disk $disk_name will be formatted with a(n) $partition_layout layout."
 
-while true; do
-
-    # User input
-    read -p "/dev/" disk_name
-    disk_dir="/dev/$disk_name"
-
-    # Gets type of drive
-    if [[ $disk_name == *"sd"* ]]; then
-        disk_type="sata"
-    elif [[ $disk_name == *"nvme"* ]]; then
-        disk_type="nvme"
-    fi
-
-    # Checks if disk exists
-    if [[ $disk_dir == *"$disks"* ]]; then
-        break
-    fi
-
-done
-
-
-## Full disk encryption
-echo
-echo "Do you want full disk encryption?"
-
-while true; do
-
-    # User input
-    read -p "(Y/N) " disk_fde
-    disk_fde=${disk_fde,,}
-
-    # Encryption
-    if [ $disk_fde == "y" ]; then
-        disk_fde=true
-        disk_fde_name=cryptsystem
-
-        # Password input
-        while true; do
-            echo
-            read -p "Please enter a password: " -s disk_password
-            echo
-            read -p "Please enter it again: " -s disk_passwordcheck
-            echo
-
-            # Matching passwords
-            if [ $disk_password == $disk_passwordcheck ]; then
-                break
-            else
-                echo "Passwords are not the same, try again."
-            fi
-        done
-    fi
-
-    break
-done
-
-
-## EFI or BIOS
-echo
-echo "Is this an EFI or BIOS system?"
-
-while true; do
-
-    # User input
-    read -p "(E/B) " disk_layout
-    disk_layout=${disk_layout,,}
-
-    # EFI system
-    if [ $disk_layout == "e" ]; then
-
-        # Partitions for SATA drive
-        if [ $disk_type == "sata" ]; then
-            disk_partition_boot=$disk_dir"1"
-            disk_partition_root=$disk_dir"2"
-
-        # Partitions for NVME drive
-        elif [ $disk_type == "nvme" ]; then
-            disk_partition_boot=$disk_dir"p1"
-            disk_partition_root=$disk_dir"p2"
-        fi
-
-        break
-
-    # BIOS system
-    elif [ $disk_layout == "b" ]; then
-
-        # Partitions for SATA drive
-        if [ $disk_type == "sata" ]; then
-            disk_partition_bios=$disk_dir"1"
-            disk_partition_root=$disk_dir"2"
-
-        # Partitions for NVME drive
-        elif [ $disk_type == "nvme" ]; then
-            disk_partition_bios=$diskdir"p1"
-            disk_partition_root=$disk_dir"p2"
-        fi
-
-        break
-    fi
-done
-
-
-## Format
-echo
-echo "Do you want EXT4 or BTRFS?"
-
-while true; do
-
-    # User input
-    read -p "(E/B) " disk_format
-    disk_format=${disk_format,,}
-
-    if [ $disk_format == "e" ] || [ $disk_format == "b" ]; then
-        break
-    fi
-done
-
-
-## Checking
-echo
-echo "Is this all correct?"
-
-echo "VM=$config_vm"
-echo "DISK=$disk_dir"
-
-if [ $disk_layout = "e" ]; then
-    echo "LAYOUT=EFI"
-    echo "BOOT=$disk_partition_boot"
+if [ $crypt == true ]; then
+    echo "The root will be encrypted with the name $crypt_name, mounted on $crypt_partition and with the password of $crypt_password. It will have the $partition_root_format filesystem."
 else
-    echo "LAYOUT=BIOS"
-    echo "BIOS=$disk_partition_bios"
+    echo "The root will be formatted as $partition_root_format."
 fi
 
-echo "ROOT=$disk_partition_root"
-echo "ENCRYPT=$disk_fde"
-echo "ENCRYPT PASSWORD=$disk_password"
-
-if [ $disk_format == "e" ]; then
-    echo "FORMAT=EXT4"
-elif [ $disk_format == "b" ]; then
-    echo "FORMAT=BTRFS"
+if [ system_vm == true ]; then
+    echo "The system is a VM and is called $system_hostname."
+else
+    echo "The system will be called $system_hostname"
 fi
 
-echo
+## Confirm
+while true; do
+    echo
+    echo "Are you sure you want to do this? Type 'YES' in capital letters."
 
-# Confirm
-confirm
+    read -p "> " confirm
+
+    if [ $confirm == "YES" ]; then
+        break
+    else
+        exit
+    fi
+done
 
 
-## Partitioning
-echo
-echo "--- Partitioning Drive"
+### --- PARTITION ---
+echo "------ Partitioning $disk_name"
 
-# Unmount
-umount $disk_dir*
-
-# Wipe partitions
-sgdisk --zap-all $disk_dir
-
-# Partition
-if [ $disk_layout == "e" ]; then
+# EFI
+if [ $partition_layout == "efi" ]; then
     (
         echo g
         echo n
         echo
         echo
         echo +512M
+        echo y
         echo t
         echo 1
         echo n
@@ -246,13 +75,15 @@ if [ $disk_layout == "e" ]; then
         echo w
     ) | fdisk $disk_dir
 
-elif [ $disk_layout == "b" ]; then
+# BIOS
+elif [ $partition_layout == "bios" ]; then
     (
         echo g
         echo n
         echo
         echo
         echo +1M
+        echo y
         echo t
         echo 4
         echo n
@@ -264,280 +95,33 @@ elif [ $disk_layout == "b" ]; then
 fi
 
 
+echo "------ Formatting $disk_name"
+
 # FDE
-if [ $disk_fde == true ]; then
+if [ $crypt == true ]; then
+    echo $crypt_password | cryptsetup luksFormat $partition_root
+    echo $crypt_password | cryptsetup open $partition_root $crypt_name
 
-    # Setup encrypted volume
-    echo $disk_password | cryptsetup luksFormat $disk_partition_root
-    echo $disk_password | cryptsetup open $disk_partition_root $disk_fde_name
-
-    # Set location
-    disk_partition_crypt=/dev/mapper/$disk_fde_name
-
-    # Format
-    if [ $disk_format == "e" ]; then
-        mkfs.ext4 $disk_partition_crypt
-    elif [ $disk_format == "b" ]; then
-        mkfs.btrfs -f $disk_partition_crypt
+    if [ $partition_root_format == "ext4" ]; then
+        mkfs.ext4 $crypt_partition
+    elif [ $partition_root_format == "btrfs" ]; then
+        mkfs.btrfs $crypt_partition
     fi
-    
-    # Mount
-    mount $disk_partition_crypt /mnt
+
+    mount $crypt_partition /mnt
 
 else
-
-    # Format
-    if [ $disk_format == "e" ]; then
-        mkfs.ext4 $disk_partition_root
-    elif [ $disk_format == "b" ]; then
-        mkfs.btrfs -f $disk_partition_root
+    if [ $partition_root_format == "ext4" ]; then
+        mkfs.ext4 $partition_root
+    elif [ $partition_root_format == "btrfs" ]; then
+        mkfs.btrfs -f $partition_root
     fi
 
-    # Mount
-    mount $disk_partition_root /mnt
+    mount $partition_root /mnt
 fi
 
 # Boot
-if [ $disk_layout == "e" ]; then
-
-    # Make dir
+if [ $partition_layout == "efi" ]; then
     mkdir -p /mnt/boot
-
-    # Format
-    mkfs.fat -F32 $disk_partition_boot
-
-    # Mount
-    mount $disk_partition_boot /mnt/boot
+    mount $partition_boot /mnt/boot
 fi
-
-
-
-### --- PACKAGES ---
-echo -ne "
-------------------------------------------------------------------
-
-                      Installing Packages
-
-------------------------------------------------------------------
-"
-
-# Base
-if [ $config_vm == true ]; then
-    package_base="base base-devel neovim"
-else
-    package_base="base base-devel linux-firmware neovim"
-fi
-
-
-## Kernel
-echo
-echo "What kernel do you want?"
-echo "1) linux"
-echo "2) linux-lts"
-echo "3) linux-zen"
-
-while true; do
-
-    # User input
-    read -p "(1-3) " config_kernel
-
-    # linux
-    if [ $config_kernel == "1" ]; then
-        config_kernel="linux"
-        package_kernel="linux linux-headers"
-        break
-
-    # linux-lts
-    elif [ $config_kernel == "2" ]; then
-        config_kernel="linux-lts"
-        package_kernel="linux-lts linux-lts-headers"
-        break
-
-    # linux-zen
-    elif [ $config_kernel == "3" ]; then
-        config_kernel="linux-zen"
-        package_kernel="linux-zen linux-zen-headers"
-        break
-
-    fi
-done
-
-
-## Microcode
-
-# Get cpu
-cpu=$(cat /proc/cpuinfo | grep 'model name' | uniq)
-
-# AMD
-if [[ $cpu == *"AMD"* ]]; then
-    package_microcode="amd-ucode"
-
-# Intel
-elif [[ $cpu == *"Intel"* ]]; then
-    package_microcode="intel-ucode"
-fi
-
-
-## Bootloader
-echo
-echo "Do you want systemd-boot or GRUB?"
-
-while true; do
-	
-	# User input
-	read -p "(S/G) " config_bootloader
-	config_bootloader=${config_bootloader,,}
-
-	# systemd-boot
-	if [ $config_bootloader == "s" ]; then
-		config_bootloader="systemd-boot"
-		break
-
-	# GRUB
-	elif [ $config_bootloader == "g" ]; then
-		config_bootloader="grub"
-		package_bootloader="grub efibootmgr os-prober"
-		break
-	fi
-done
-
-
-## Wi-Fi
-echo
-echo "Do you want NetworkManager?"
-
-while true; do
-
-	# User input
-	read -p "(Y/N) " config_networkmanager
-	config_networkmanager=${config_networkmanager,,}
-
-	# NetworkManager
-	if [ $config_networkmanager == "y" ]; then
-		package_internet="dhcpcd networkmanager"
-		break
-	
-	# Ethernet
-	elif [ $config_networkmanager == "n" ]; then
-		package_internet="dhcpcd"
-		break
-	fi
-done
-
-
-## GUI
-echo
-echo "Do you want a GUI?"
-
-while true; do
-	read -p "(Y/N) " config_gui
-	config_gui=${config_gui,,}
-
-	# GUI
-	if [ $config_gui == "y" ]; then
-		config_gui=true
-		break
-	
-	# Terminal
-	elif [ $config_gui == "n" ]; then
-		config_gui=false
-		break
-	fi
-done
-
-
-## GUI programs
-if [ $config_gui == true ]; then
-
-	## Backend
-	echo
-	echo "Do you want X.ORG or Wayland?"
-	
-	while true; do
-
-		# User input
-		read -p "(X/W) " config_displaybackend
-		config_displaybackend=${config_displaybackend,,}
-
-		# X.ORG
-		if [ $config_displaybackend == "x" ]; then
-			package_displaybackend="xorg"
-			break
-
-		# Wayland
-		elif [ $config_displaybackend == "w" ]; then
-			package_displaybackend="wayland"
-			break
-		fi
-	done
-
-
-	## Desktop environment
-	echo
-	echo "Which DE do you want?"
-	echo "1) GNOME"
-	echo "2) KDE Plasma"
-	echo "3) Cinnamon"
-
-	while true; do
-
-		# User input
-		read -p "(1-3) " config_desktop
-		
-		# GNOME
-		if [ $config_desktop == "1" ]; then
-			package_desktop="gnome gdm gnome-terminal nautilus python-nautilus"
-            break
-
-		# Plasma
-		elif [ $config_desktop == "2" ]; then
-
-			# Wayland
-			if [ $config_displaybackend == "w" ]; then
-				package_desktop="plasma dolphin konsole plasma-wayland-session"
-
-			# X.ORG
-			else
-				package_desktop="plasma dolphin konsole"
-			fi
-
-            break
-		fi
-	done
-fi
-
-
-## Checking
-echo
-echo "Is this all correct?"
-
-echo "KERNEL=$package_kernel"
-echo "MICROCODE=$package_microcode"
-echo "BOOTLOADER=$package_bootloader"
-echo "NETWORK=$package_internet"
-echo "DISPLAY BACKEND=$package_displaybackend"
-echo "DESKTOP=$package_desktop"
-echo
-
-confirm
-
-
-## Installing
-echo
-echo "--- Installing packages"
-
-# Pacstrap
-pacstrap /mnt $package_base $package_kernel $package_microcode $package_bootloader $package_internet $package_displaybackend $package_desktop
-
-# fstab
-genfstab -U /mnt >> /mnt/etc/fstab
-
-
-## Post-Install
-
-# Move script
-cp ./postinstall.sh /mnt/postinstall.sh
-chmod +x /mnt/postinstall.sh
-
-# Run script
-arch-chroot /mnt (. ./postinstall.sh)
