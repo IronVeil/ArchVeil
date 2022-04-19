@@ -243,7 +243,7 @@ sed -i "s/partition_root_format=.*/partition_root_format=$partition_root_format/
 
 ## Base
 if [ $system_vm == "true" ]; then
-    package_base="base base-devel linux-firmware"
+    package_base="base base-devel"
 else
     package_base="base base-devel linux-firmware"
 fi
@@ -282,7 +282,7 @@ while true; do
 done
 
 ## Export to file
-sed -i "s/packages=.*/packages=$package_base $package_kernel/" ./settings.sh
+sed -i "s/packages=.*/packages='$package_base $package_kernel'/" ./settings.sh
 
 ### --- INSTALL ---
 ./install.sh
