@@ -39,6 +39,8 @@ else
     echo "The system will be called $system_hostname"
 fi
 
+echo "The base packages to install are: $packages"
+
 ## Confirm
 while true; do
     echo
