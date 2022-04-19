@@ -57,7 +57,7 @@ while true; do
     system_user=${system_user,,}
 
     # Validation
-    if [ ! -z system_user ]; then
+    if [ ! -z $system_user ]; then
         break
     fi
 done
@@ -77,10 +77,13 @@ while true; do
     echo
 
     # Validation
-    if [ ! -z system_pass ]; then
+    if [ ! -z $system_pass ]; then
         break
     fi
 done
+
+# Export to file
+sed -i "s/system_pass=.*/system_pass=$system_pass/" ./settings.sh
 
 
 ## Autologin
@@ -137,6 +140,9 @@ if [ $root_same == "n" ]; then
         break
     fi
 fi
+
+# Export to file
+sed -i "s/system_root_pass=.*/system_root_pass=$system_root_pass/" ./settings.sh
 
 
 

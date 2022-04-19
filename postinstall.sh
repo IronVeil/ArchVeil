@@ -116,6 +116,7 @@ if [ system_user_autologin == "true" ]; then
     echo "[Service]" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
     echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
     echo 'ExecStart=-/sbin/agetty -o "-p -f -- \\u" --noclear --autologin username - $TERM' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+fi
 
 
 ## Root
