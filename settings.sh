@@ -3,6 +3,7 @@
 # SYSTEM
 system_vm=false
 system_hostname=test
+system_kernel=false
 
 # DISK
 disk_name=sda
@@ -21,3 +22,6 @@ partition_bios=false
 partition_boot=/dev/sda1
 partition_root=/dev/sda2
 partition_root_format=btrfs
+
+# PACKAGES
+packages=false

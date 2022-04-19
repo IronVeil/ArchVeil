@@ -239,5 +239,42 @@ done
 sed -i "s/partition_root_format=.*/partition_root_format=$partition_root_format/" ./settings.sh
 
 
+### --- SOFTWARE ---
+
+## Kernel
+echo
+echo "Which kernel do you want?"
+echo "1) linux"
+echo "2) linux-lts"
+echo "3) linux-zen"
+
+while true; do
+
+    # User input
+    read -p "(1-3) " package_kernel
+
+    # linux
+    if [ $package_kernel == "1"]; then
+        package_kernel="linux linux-headers"
+        system_kernel="linux"
+        break
+    
+    # linux-lts
+    elif [ $package_kernel == "2" ]; then
+        package_kernel="linux-lts linux-lts-headers"
+        system_kernel="linux-lts"
+        break
+    
+    # linux-zen
+    elif [ $package_kernel == "3" ]; then
+        package_kernel="linux-zen linux-zen-headers"
+        system_kernel="linux-zen"
+        break
+    fi
+done
+
+## Export to file
+sed -i "s/packages=.*/packages=$package_kernel/" ./settings.sh
+
 ### --- INSTALL ---
 ./install.sh

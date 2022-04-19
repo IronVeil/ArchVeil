@@ -125,3 +125,7 @@ if [ $partition_layout == "efi" ]; then
     mkdir -p /mnt/boot
     mount $partition_boot /mnt/boot
 fi
+
+
+### --- SOFTWARE
+pacstrap /mnt $packages
