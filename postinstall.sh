@@ -99,7 +99,7 @@ sed -i "151s/.zst//" /etc/makepkg.conf
 
 
 ### --- BOOTLOADER ---
-if [ $packages == *"grub"* ]; then
+if [[ $packages == *"grub"* ]]; then
 
     # EFI
     if [ $partition_layout == "efi" ]; then
