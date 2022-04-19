@@ -74,6 +74,7 @@ while true; do
 
     # User input
     read -p "Password: " -s system_pass
+    echo
 
     # Validation
     if [ system_pass != "" ]; then
@@ -359,6 +360,12 @@ while true; do
         break
     fi
 done
+
+
+## BTRFS
+if [ $partition_root_format == "btrfs" ]; then
+    packages+=" btrfs-progs"
+fi
 
 
 ## Network

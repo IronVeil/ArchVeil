@@ -147,6 +147,11 @@ fi
 
 
 ### --- SOFTWARE ---
+
+# Parallel downloads
+sed -i "37s/#//" /etc/pacman.conf
+
+# Install
 pacstrap /mnt $packages
 
 
@@ -161,7 +166,6 @@ genfstab -U /mnt >> /mnt/etc/fstab
 cp ./settings.sh /mnt/
 cp ./postinstall.sh /mnt/
 chmod +x /mnt/postinstall.sh
-
 
 # Use script
 arch-chroot /mnt ./postinstall.sh

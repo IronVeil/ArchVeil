@@ -24,12 +24,14 @@ source ./settings.sh
 ### --- LOCALE ---
 
 ## Timezone
+echo
 echo "------ Setting timezone"
 
 ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
 hwclock --systohc
 
 ## Lang
+echo
 echo "------ Setting locale"
 
 sed -i "s/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/" /etc/locale.gen
@@ -42,6 +44,7 @@ echo "KEYMAP=uk" >> /etc/vconsole.conf
 
 
 ### --- HOST ---
+echo
 echo "------ Setting hostname"
 
 ## Hostname
@@ -57,6 +60,7 @@ echo "127.0.1.1     $system_hostname.localdomain    $system_hostname" >> /etc/ho
 ### --- PACKAGES ---
 
 ## Pacman
+echo
 echo "------ Tweaking pacman"
 
 # Color
@@ -71,6 +75,7 @@ sed -i "94,95s/#//" /etc/pacman.conf
 
 
 ## makepkg
+echo
 echo "------ Tweaking make"
 
 # CFLAGS
@@ -84,7 +89,7 @@ sed -i '49s/.*/MAKEFLAGS="-j$(nproc)"/' /etc/makepkg.conf
 sed -i "75s/#//" /etc/makepkg.conf
 
 # Compression
-pacman -Sy --no-confirm pigz pbzip2
+pacman -Sy --noconfirm pigz pbzip2
 sed -i "137s/gzip/pigz/" /etc/makepkg.conf
 sed -i "138s/bzip2/pbzip2/" /etc/makepkg.conf
 sed -i "139s/-z -/-z --threads=0 -/" /etc/makepkg.conf
