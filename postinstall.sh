@@ -60,13 +60,33 @@ echo "127.0.1.1     $system_hostname.localdomain    $system_hostname" >> /etc/ho
 echo "------ Tweaking pacman"
 
 # Color
-sed -i "s/#Color/Color/" /etc/pacman.conf
+sed -i "33s/#//" /etc/pacman.conf
 sed -i "38i ILoveCandy" /etc/pacman.conf
 
 # Downloads
-sed -i "s/#VerbosePkgLists/VerbosePkgLists/" /etc/pacman.conf
-sed -i "s/#ParallelDownloads = 5/ParallelDownloads = 7/" /etc/pacman.conf
+sed -i "36,37s/#//" /etc/pacman.conf
 
 # Multilib
-sed -i "94s~#~~" /etc/pacman.conf
-sed -i "92,95s~#Include = /etc/pacman.d/mirrorlist~Include = /etc/pacman.d/mirrorlist~" /etc/pacman.conf
+sed -i "94,95s/#//" /etc/pacman.conf
+
+
+## makepkg
+echo "------ Tweaking make"
+
+# CFLAGS
+sed -i "41s/-march=x86_64 -mtune=generic/-march=native -mtune=native/" /etc/makepkg.conf
+
+# Rust flags
+sed -i "47s/.*/RUSTFLAGS='-C opt-level=2 -C target-cpu=native'/" /etc/makepkg.conf
+
+# Make flags
+sed -i '49s/.*/MAKEFLAGS="-j$(nproc)"/' /etc/makepkg.conf
+sed -i "75s/#//" /etc/makepkg.conf
+
+# Compression
+pacman -Sy --no-confirm pigz pbzip2
+sed -i "137s/gzip/pigz/" /etc/makepkg.conf
+sed -i "138s/bzip2/pbzip2/" /etc/makepkg.conf
+sed -i "139s/-z -/-z --threads=0 -/" /etc/makepkg.conf
+sed -i "140s/-q -/-q --threads=0 -/" /etc/makepkg.conf
+sed -i "151s/.zst//" /etc/makepkg.conf
