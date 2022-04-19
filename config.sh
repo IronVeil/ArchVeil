@@ -263,19 +263,19 @@ while true; do
 
     # linux
     if [ $package_kernel == "1" ]; then
-        packages+="linux linux-headers"
+        packages+=" linux linux-headers"
         system_kernel="linux"
         break
     
     # linux-lts
     elif [ $package_kernel == "2" ]; then
-        packages+="linux-lts linux-lts-headers"
+        packages+=" linux-lts linux-lts-headers"
         system_kernel="linux-lts"
         break
     
     # linux-zen
     elif [ $package_kernel == "3" ]; then
-        packages+="linux-zen linux-zen-headers"
+        packages+=" linux-zen linux-zen-headers"
         system_kernel="linux-zen"
         break
     fi
@@ -295,16 +295,16 @@ while true; do
 
     # systemd-boot
     if [ $package_bootloader == "1" ]; then
-        system_bootloader="systemd-boot"
+        system_bootloader=" systemd-boot"
         break
 
     # GRUB
     elif [ $package_bootloader == "2" ]; then
-        packages+="grub os-prober"
+        packages+=" grub os-prober"
 
         # EFI
         if [ $partition_layout == "efi" ]; then
-            packages+="efibootmgr"
+            packages+=" efibootmgr"
         fi
 
         break
