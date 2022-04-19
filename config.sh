@@ -16,6 +16,16 @@ echo -ne "
 "
 
 
+### --- SETTINGS ---
+
+# Remove current
+rm settings.sh
+
+# Create blank copy
+cp ./set/blank.sh ./settings.sh
+
+
+
 ### --- HOSTNAME ---
 echo
 echo "Please enter the name of the new system."
@@ -33,6 +43,45 @@ done
 
 # Export to file
 sed -i "s/system_hostname=.*/system_hostname=$system_hostname/" ./settings.sh
+
+
+
+### --- USER ---
+echo
+echo "Please enter your username."
+
+while true; do
+
+    # User input
+    read -p "Username: " system_user
+    system_user=${system_user,,}
+
+    # Validation
+    if [ system_user != "" ]; then
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/system_user=.*/system_user=$system_user/" ./settings.sh
+
+
+## Password
+echo
+echo "Please enter your password."
+
+while true; do
+
+    # User input
+    read -p "Password: " -s system_pass
+
+    # Validation
+    if [ system_pass != "" ]; then
+        break
+    fi
+done
+
+
 
 ### --- VM ---
 echo
@@ -310,6 +359,62 @@ while true; do
         break
     fi
 done
+
+
+## Network
+echo
+echo "Do you want Wi-Fi through NetworkManager?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " package_network
+    package_network=${package_network,,}
+
+    # Wi-Fi
+    if [ $package_network == "y" ]; then
+        packages+=" networkmanager"
+        break
+    
+    # Ethernet
+    elif [ $package_network == "n" ]; then
+        break
+    fi
+done
+
+# Ethernet
+packages+=" dhcpcd"
+
+
+## Editor
+echo
+echo "Which editor do you want?"
+echo "1) neovim"
+echo "2) vim"
+echo "3) nano"
+
+while true; do
+
+    # User input
+    read -p "(1-3) " package_editor
+
+    # neovim
+    if [ $package_editor == "1" ]; then
+        packages+=" neovim"
+        break
+
+    # vim
+    elif [ $package_editor == "2" ]; then
+        packages+=" vim"
+        break
+
+    # nano
+    elif [ $package_editor == "3" ]; then
+        packages+=" nano"
+        break
+    fi
+done
+
 
 ## Export to file
 sed -i "s/packages=.*/packages='$packages'/" ./settings.sh

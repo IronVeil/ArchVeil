@@ -59,7 +59,11 @@ done
 ### --- PARTITION ---
 echo "------ Partitioning $disk_name"
 
-# EFI
+## Unmount
+umount /dev/sda*
+
+
+## EFI
 if [ $partition_layout == "efi" ]; then
     (
         echo g
@@ -77,7 +81,7 @@ if [ $partition_layout == "efi" ]; then
         echo w
     ) | fdisk $disk_dir
 
-# BIOS
+## BIOS
 elif [ $partition_layout == "bios" ]; then
     (
         echo g
@@ -99,31 +103,44 @@ fi
 
 echo "------ Formatting $disk_name"
 
-# FDE
+## FDE
 if [ $crypt == true ]; then
     echo $crypt_password | cryptsetup luksFormat $partition_root
     echo $crypt_password | cryptsetup open $partition_root $crypt_name
 
+    # EXT4
     if [ $partition_root_format == "ext4" ]; then
         mkfs.ext4 $crypt_partition
+    
+    # BTRFS
     elif [ $partition_root_format == "btrfs" ]; then
         mkfs.btrfs $crypt_partition
     fi
 
+    # Mount
     mount $crypt_partition /mnt
 
 else
+    # EXT4
     if [ $partition_root_format == "ext4" ]; then
         mkfs.ext4 $partition_root
+    
+    # BTRFS
     elif [ $partition_root_format == "btrfs" ]; then
         mkfs.btrfs -f $partition_root
     fi
 
+    # Mount
     mount $partition_root /mnt
 fi
 
-# Boot
+## Boot
 if [ $partition_layout == "efi" ]; then
+
+    # Format
+    mkfs.fat -F32 $partition_boot
+
+    # Mount
     mkdir -p /mnt/boot
     mount $partition_boot /mnt/boot
 fi
