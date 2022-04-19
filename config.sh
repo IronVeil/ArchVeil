@@ -241,6 +241,14 @@ sed -i "s/partition_root_format=.*/partition_root_format=$partition_root_format/
 
 ### --- SOFTWARE ---
 
+## Base
+if [ $system_vm == "true" ]; then
+    package_base="base base-devel linux-firmware"
+else
+    package_base="base base-devel linux-firmware"
+fi
+
+
 ## Kernel
 echo
 echo "Which kernel do you want?"
@@ -254,7 +262,7 @@ while true; do
     read -p "(1-3) " package_kernel
 
     # linux
-    if [ $package_kernel == "1"]; then
+    if [ $package_kernel == "1" ]; then
         package_kernel="linux linux-headers"
         system_kernel="linux"
         break
@@ -274,7 +282,7 @@ while true; do
 done
 
 ## Export to file
-sed -i "s/packages=.*/packages=$package_kernel/" ./settings.sh
+sed -i "s/packages=.*/packages=$package_base $package_kernel/" ./settings.sh
 
 ### --- INSTALL ---
 ./install.sh
