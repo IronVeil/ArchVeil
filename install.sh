@@ -363,7 +363,7 @@ done
 ## Microcode
 
 # Get cpu
-cpu=($(cat /proc/cpuinfo | grep 'model name' | uniq))
+cpu=$(cat /proc/cpuinfo | grep 'model name' | uniq)
 
 # AMD
 if [[ $cpu == *"AMD"* ]]; then
@@ -399,6 +399,106 @@ while true; do
 done
 
 
+## Wi-Fi
+echo
+echo "Do you want NetworkManager?"
+
+while true; do
+
+	# User input
+	read -p "(Y/N) " config_networkmanager
+	config_networkmanager=${config_networkmanager,,}
+
+	# NetworkManager
+	if [ $config_networkmanager == "y" ]; then
+		$package_internet="dhcpcd networkmanager"
+		break
+	
+	# Ethernet
+	elif [ $config_networkmanager == "n" ]; then
+		$package_internet="dhcpcd"
+		break
+	fi
+done
+
+
+## GUI
+echo
+echo "Do you want a GUI?"
+
+while true; do
+	read -p "(Y/N) " config_gui
+	config_gui=${config_gui,,}
+
+	# GUI
+	if [ $config_gui == "y" ]; then
+		config_gui=true
+		break
+	
+	# Terminal
+	elif [ $config_gui == "n" ]; then
+		config_gui=false
+		break
+	fi
+done
+
+
+## GUI programs
+if [ $config_gui == true ]; then
+
+	## Backend
+	echo
+	echo "Do you want X.ORG or Wayland?"
+	
+	while true; do
+
+		# User input
+		read -p "(X,W) " config_displaybackend
+		config_displaybackend=${config_displaybackend,,}
+
+		# X.ORG
+		if [ $config_displaybackend == "x" ]; then
+			package_displaybackend="xorg"
+			break
+
+		# Wayland
+		elif [ $config_displaybackend == "w" ]; then
+			package_displaybackend="wayland"
+			break
+		fi
+	done
+
+
+	## Desktop environment
+	echo
+	echo "Which DE do you want?"
+	echo "1) GNOME"
+	echo "2) KDE Plasma"
+	echo "3) Cinnamon"
+
+	while true; do
+
+		# User input
+		read -p "(1-3) " config_desktop
+		
+		# GNOME
+		if [ $config_desktop == "1" ]; then
+			$package_desktop="gnome gdm gnome-terminal nautilus python-nautilus"
+		elif [ $config_desktop == "2" ]; then
+
+			# Wayland
+			if [ $config_displaybackend == "w" ]; then
+				$package_desktop="plasma dolphin konsole plasma-wayland-session"
+
+			# X.ORG
+			else
+				$package_desktop="plasma dolphin konsole"
+			fi
+		fi
+	done
+fi
+
+
 ## Checking
 echo
 echo "Is this all correct?"
@@ -406,6 +506,9 @@ echo "Is this all correct?"
 echo "KERNEL=$package_kernel"
 echo "MICROCODE=$package_microcode"
 echo "BOOTLOADER=$package_bootloader"
+echo "NETWORK=$package_internet"
+echo "DISPLAY BACKEND=$package_displaybackend"
+echo "DESKTOP=$package_desktop"
 echo
 
 confirm
