@@ -146,5 +146,20 @@ if [ $partition_layout == "efi" ]; then
 fi
 
 
-### --- SOFTWARE
+### --- SOFTWARE ---
 pacstrap /mnt $packages
+
+
+### --- POST INSTALL ---
+
+## fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+## Post-install script
+
+# Movement
+cp ./settings.sh /mnt/
+cp ./postinstall.sh /mnt/
+
+# Use script
+arch-chroot /mnt ./postinstall.sh
