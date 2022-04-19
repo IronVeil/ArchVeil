@@ -323,9 +323,9 @@ echo -ne "
 
 # Base
 if [ $config_vm == true ]; then
-    package_base="base base-devel"
+    package_base="base base-devel neovim"
 else
-    package_base="base base-devel linux-firmware"
+    package_base="base base-devel linux-firmware neovim"
 fi
 
 
@@ -528,3 +528,16 @@ echo "--- Installing packages"
 
 # Pacstrap
 pacstrap /mnt $package_base $package_kernel $package_microcode $package_bootloader $package_internet $package_displaybackend $package_desktop
+
+# fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+
+## Post-Install
+
+# Move script
+cp ./postinstall.sh /mnt/postinstall.sh
+chmod +x /mnt/postinstall.sh
+
+# Run script
+arch-chroot /mnt ./postinstall.sh
