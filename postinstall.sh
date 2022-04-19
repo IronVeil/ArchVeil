@@ -98,6 +98,24 @@ sed -i "151s/.zst//" /etc/makepkg.conf
 
 
 
+### --- USERS ---
+
+## Main
+echo
+echo "------ Setting up $system_user"
+
+useradd -mG wheel $system_user
+echo -e "$system_pass\n$system_pass" | passwd $system_user
+
+
+## Root
+echo
+echo "------ Setting up root"
+
+echo -e "$system_root_pass\n$system_root_pass" | passwd root
+
+
+
 ### --- BOOTLOADER ---
 if [[ $packages == *"grub"* ]]; then
 

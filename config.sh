@@ -36,7 +36,7 @@ while true; do
     read -p "Name: " system_hostname
 
     # Validation
-    if [ system_hostname != "" ]; then
+    if [ ! -z system_hostname ]; then
         break
     fi
 done
@@ -57,7 +57,7 @@ while true; do
     system_user=${system_user,,}
 
     # Validation
-    if [ system_user != "" ]; then
+    if [ ! -z system_user ]; then
         break
     fi
 done
@@ -77,10 +77,40 @@ while true; do
     echo
 
     # Validation
-    if [ system_pass != "" ]; then
+    if [ ! -z system_pass ]; then
         break
     fi
 done
+
+
+## Root password
+echo
+echo "Do you want the root password to be the same as the user password?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " root_same
+    root_same=${root_same,,}
+
+    if [ $root_same == "y" ]; then
+        system_root_pass=$system_pass
+        break
+    fi
+done
+
+# Password input
+if [ $root_same == "n" ]; then
+
+    # User input
+    read -p "Root Password: " -s system_root_pass
+    echo
+
+    # Validation
+    if [ ! -z system_root_pass ]; then
+        break
+    fi
+fi
 
 
 
