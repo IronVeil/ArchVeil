@@ -363,7 +363,7 @@ while true; do
 done
 
 # Export to file
-sed -i "s/system_bootloader/system_bootloader=$system_bootloader/" ./settings.sh
+sed -i "s/system_bootloader=.*/system_bootloader=$system_bootloader/" ./settings.sh
 
 
 ## BTRFS
