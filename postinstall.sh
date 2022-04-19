@@ -54,12 +54,12 @@ echo "127.0.1.1     $system_hostname.localdomain    $system_hostname" >> /etc/ho
 
 # Color
 sed -i "s/#Color/Color/" /etc/pacman.conf
-echo "ILoveCandy" >> /etc/pacman.conf
+sed "38i ILoveCandy" /etc/pacman.conf
 
 # Downloads
 sed -i "s/#VerbosePkgLists/VerbosePkgLists/" /etc/pacman.conf
 sed -i "s/#ParallelDownloads = 5/ParallelDownloads = 7/" /etc/pacman.conf
 
 # Multilib
-sed -i "s/#[multilib]/[multilib]/" /etc/pacman.conf
-sed -i "s~#Include = /etc/pacman.d/mirrorlist~Include = /etc/pacman.d/mirrorlist~" /etc/pacman.conf
+sed -i "91,94s/#[multilib]/[multilib]/" /etc/pacman.conf
+sed -i "92,95s~#Include = /etc/pacman.d/mirrorlist~Include = /etc/pacman.d/mirrorlist~" /etc/pacman.conf
