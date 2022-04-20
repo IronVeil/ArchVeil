@@ -11,15 +11,17 @@ system_root_pass=
 system_kernel=
 system_bootloader=
 system_grub_delay=
+system_desktop=
 
 # DISK
 disk_name=
 disk_type=
+disk_speed=
 disk_dir=
 
 # ENCRYPTION
 crypt=
-crypt_name="cryptsystem"
+crypt_name="cryptroot"
 crypt_partition=/dev/mapper/$crypt_name
 crypt_password=
 
@@ -32,6 +34,3 @@ partition_root_format=
 
 # PACKAGES
 packages=
-
-# EXTRA
-extra_aur=

@@ -156,26 +156,57 @@ echo -e "$system_root_pass\n$system_root_pass" | passwd root
 ### --- SOFTWARE ---
 
 ## yay
-if [ $extra_aur == "true" ]; then
 
-    # Disable need for sudo password
-    echo "$system_user  ALL=(ALL) NOPASSWD=ALL" >> /etc/sudoers
+# Disable need for sudo password
+echo "$system_user  ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-    # Clone repo
-    cd /home/$system_user
-    su -c "git clone https://aur.archlinux.org/yay.git" $system_user
-    cd yay
+# Install needed tools
+pacman -Sy --noconfirm go git
 
-    # Make
-    echo -e "$system_pass" | su -c "makepkg -si" $system_user
+# Clone repo
+cd /home/$system_user
+su -c "git clone https://aur.archlinux.org/yay.git" $system_user
+cd yay
 
-    # Remove dir
-    cd ../
-    rm -r yay
+# Make
+echo -e "$system_pass" | su -c "makepkg -si" $system_user
 
-    # Enable need for sudo password
-    sed '$d' /etc/sudoers
+# Remove dir
+cd ../
+rm -r yay
 
+
+## Performance services
+
+# Installing
+su -c "yay -S --noconfirm --save --nocleanmenu --nodiffmenu ananicy-cpp irqbalance memavaild nohang preload prelockd uresourced" $system_user
+
+# Enabling
+systemctl disable systemd-oomd
+systemctl enable ananicy-cpp irqbalance memavaild nohang preload prelockd uresourced
+
+# Enable zram checking
+sed -i 's|zram_checking_enabled = False|zram_checking_enabled = True|g' /etc/nohang/nohang.conf
+
+# Enable need for sudo password
+sed -i '$d' /etc/sudoers
+
+
+## Sound
+
+# Installing
+yay -S --noconfirm --save --nocleanmenu --nodiffmenu pipewire-pulse pipewire-jack lib32-pipewire-jack alsa-plugins alsa-firmware sof-firmware alsa-card-profiles
+
+
+## Fonts
+
+# Installing
+yay -S --noconfirm --save --nocleanmenu --nodiffmenu ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts
+
+
+## GUI tweaks
+if [ $system_desktop !- "none" ]; then
+    yay -S --noconfirm --save --nocleanmenu --nodiffmenu libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal
 fi
 
 
@@ -195,6 +226,26 @@ systemctl enable dhcpcd
 
 
 ### --- BOOTLOADER ---
+
+## mkinitcpio
+echo
+echo "------ Modifying mkinitcpio"
+
+# Filesystem
+sed -i "7s/.*/MODULES=($partition_root_format)" /etc/mkinitcpio.conf
+
+# Encrypted
+if [ $crypt == "true" ]; then
+
+    # Add hooks
+    sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)" /etc/mkinitcpio.conf
+fi
+
+# Rebuild kernel
+mkinitcpio -P
+
+
+## Bootloader
 echo
 echo "------ Installing bootloader"
 
@@ -211,12 +262,20 @@ if [ $system_bootloader == "systemd-boot" ]; then
     echo "linux /vmlinuz-$system_kernel
 initrd /${system_cpu}-ucode.img
 initrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
+
+    # UUID
+    uuid=$(blkid -o value -s UUID ${partition_root})
     
     # Root
     if [ $crypt == "true" ]; then
-        break
+        echo "options cryptdevice=${uuid}:${crypt_name} root=${crypt_partition} rw quiet splash" >> /boot/loader/entries/arch.conf
+
+        # SSD TRIM support
+        if [ $disk_speed == "ssd" ]; then
+            sed -i "s/${crypt_name}/${crypt_name}:allow-discards"
+        fi
+
     else
-        uuid=$(blkid -o value -s UUID ${partition_root})
         echo "options root=UUID=$uuid rw quiet splash" >> /boot/loader/entries/arch.conf
     fi
 

@@ -227,6 +227,32 @@ sed -i "s/disk_type=.*/disk_type=$disk_type/" ./settings.sh
 sed -i "s~disk_dir=.*~disk_dir=$disk_dir~" ./settings.sh
 
 
+## Disk type
+echo
+echo "Is it an SSD or HDD?"
+
+while true; do
+
+    # User input
+    read -p "(S/H) " disk_speed
+    disk_speed=${disk_speed,,}
+
+    # SSD
+    if [ $disk_speed == "s" ]; then
+        disk_speed="ssd"
+        break
+    
+    # HDD
+    elif [ $disk_speed == "h" ]; then
+        disk_speed="hdd"
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/disk_speed=.*/disk_speed=$disk_speed/" ./settings.sh
+
+
 ## Full disk encryption
 echo
 echo "Do you want full disk encryption?"
@@ -546,35 +572,38 @@ while true; do
 done
 
 
-## AUR
+## Desktop envirnoment
 echo
-echo "Do you want AUR support through yay?"
+echo "Which desktop environment do you want?"
+echo "1) None"
+echo "2) GNOME"
+echo "3) Cinnamon"
+echo "4) KDE Plasma"
+echo "5) XFCE"
 
 while true; do
 
     # User input
-    read -p "(Y/N) " extra_aur
-    extra_aur=${extra_aur,,}
+    read -p "(1-5) " system_desktop
 
-    # AUR
-    if [ $extra_aur == "y" ]; then
-        extra_aur=true
+    # None
+    if [ $system_desktop == "1" ]; then
+        system_desktop="none"
+        break
+    
+    # GNOME
+    elif [ $system_desktop == "2" ]; then
+        system_desktop="gnome"
 
         # Install
-        packages+=" go git"
-
-        break
-
-    # No AUR
-    elif [ $extra_aur == "n" ]; then
-        extra_aur=false
+        packages+=" gnome gnome-terminal nautilus python-nautilus gnome-tweak-tool"
 
         break
     fi
 done
 
 # Export to file
-sed -i "s/extra_aur=.*/extra_aur=$extra_aur/" ./settings.sh
+sed -i "s/system_desktop=.*/system_desktop=$system_desktop/" ./settings.sh
 
 
 ## Export to file
