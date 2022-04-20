@@ -73,6 +73,12 @@ sed -i "36,37s/#//" /etc/pacman.conf
 # Multilib
 sed -i "94,95s/#//" /etc/pacman.conf
 
+# Reflector
+pacman -Sy reflector
+
+reflector -c GB --sort rate --save /etc/pacman.d/mirrorlist
+systemctl enable reflector.timer
+
 
 ## makepkg
 echo
