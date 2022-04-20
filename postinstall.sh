@@ -74,7 +74,7 @@ sed -i "36,37s/#//" /etc/pacman.conf
 sed -i "94,95s/#//" /etc/pacman.conf
 
 # Reflector
-pacman -Sy reflector
+pacman -Sy --noconfirm reflector
 
 reflector -c GB --sort rate --save /etc/pacman.d/mirrorlist
 systemctl enable reflector.timer
