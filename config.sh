@@ -398,52 +398,65 @@ sed -i "s/system_kernel=/system_kernel=$system_kernel/" ./settings.sh
 
 
 ## Bootloader
-echo
-echo "Which bootloader do you want?"
-echo "1) systemd-boot"
-echo "2) GRUB"
 
-while true; do
+# BIOS
+if [ $partition_layout == "bios" ]; then
+    packages+="grub os-prober"
+    system_bootloader="grub"
 
-    # User input
-    read -p "(1/2) " package_bootloader
+# EFI
+elif [ $partition_layout == "efi" ]; then
 
-    # systemd-boot
-    if [ $package_bootloader == "1" ]; then
-        break
+    echo
+    echo "Which bootloader do you want?"
+    echo "1) systemd-boot"
+    echo "2) GRUB"
 
-    # GRUB
-    elif [ $package_bootloader == "2" ]; then
-        packages+=" grub os-prober"
+    while true; do
 
-        # EFI
-        if [ $partition_layout == "efi" ]; then
-            packages+=" efibootmgr"
+        # User input
+        read -p "(1/2) " system_bootloader
+
+        # systemd-boot
+        if [ $system_bootloader == "1" ]; then
+            system_bootloader="systemd-boot"
+            break
+
+        # GRUB
+        elif [ $system_bootloader == "2" ]; then
+            system_bootloader="grub"
+            packages+=" grub os-prober efibootmgr"
+
+            break
         fi
+    done
+fi
 
-        ## Timeout
-        echo
-        echo "Do you want a 5 second delay to select other operating systems?"
+# GRUB Timeout
+if [ $system_bootloader == "grub" ]; then
+    echo
+    echo "Do you want a 5 second delay to select other operating systems?"
 
-        while true; do
-            read -p "(Y/N) " system_grub_delay
-            system_grub_delay=${system_grub_delay,,}
+    while true; do
+        read -p "(Y/N) " system_grub_delay
+        system_grub_delay=${system_grub_delay,,}
 
-            # Delay
-            if [ $system_grub_delay == "y" ]; then
-                system_grub_delay=true
-                break
-            elif [ $system_grub_delay == "n" ]; then
-                system_grub_delay=false
-                break
-            fi
-        done
+        # Delay
+        if [ $system_grub_delay == "y" ]; then
+            system_grub_delay=true
+            break
 
-        break
-    fi
-done
+        # No delay
+        elif [ $system_grub_delay == "n" ]; then
+            system_grub_delay=false
+            break
+        fi
+    done
+fi
+
 
 # Export to file
+sed -i "s/system_bootloader=.*/system_bootloader=$system_bootloader/" ./settings.sh
 sed -i "s/system_grub_delay=.*/system_grub_delay=$system_grub_delay/" ./settings.sh
 
 

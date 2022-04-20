@@ -146,8 +146,28 @@ systemctl enable dhcpcd
 echo
 echo "------ Installing bootloader"
 
+## systemd-boot
+if [ $system_bootloader == "systemd-boot" ]; then
+
+    # Install
+    bootctl install
+
+    # Add entry
+    echo "title Arch Linux" >> /boot/loader/entries/arch.conf
+
+    # Kernel
+    echo "linux /vmlinuz-$system_kernel\ninitrd /${system_cpu}-ucode.img\ninitrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
+    
+    # Root
+    if [ $crypt == "true" ]; then
+        break
+    else
+        uuid=$(blkid -o value -s UUID $disk_dir)
+        echo "options root=UUID=$uuid rw quiet splash" >> /boot/loader/entries/arch.conf
+    fi
+
 ## GRUB
-if [[ $packages == *"grub"* ]]; then
+elif [ $system_bootloader == "grub" ]; then
 
     # Enable os-prober
     sed -i "63s/#//" /etc/default/grub
@@ -172,40 +192,4 @@ if [[ $packages == *"grub"* ]]; then
 
     # Config
     grub-mkconfig -o /boot/grub/grub.cfg
-
-## systemd-boot
-else
-    
-    # Install
-    bootctl install
-
-    # Add entry
-    echo "title Arch Linux" >> /boot/loader/entries/arch.conf
-    
-    # linux
-    if [ $system_kernel == "linux" ]; then
-        echo "linux /vmlinuz-linux
-        initrd /initramfs-linux.img" >> /boot/loader/entries/arch.conf
-
-    # linux-lts
-    elif [ $system_kernel == "linux-lts" ]; then
-        echo "linux /vmlinuz-linux-lts
-        initrd /initramfs-linux-lts.img" >> /boot/loader/entries/arch.conf
-
-    # linux-zen
-    elif [ $system_kernel == "linux-zen" ]; then
-        echo "linux /vmlinuz-linux-zen
-        initrd /initramfs-linux-zen.img" >> /boot/loader/entries/arch.conf
-    fi
-
-    # AMD
-    if [ $system_cpu == "amd" ]; then
-        pacman -Sy --noconfirm amd-ucode
-        echo "initrd /amd-ucode.img" >> /boot/loader/entries/arch.conf
-    
-    # Intel
-    elif [ $system_cpu == "intel" ]; then
-        pacman -Sy --noconfirm intel-ucode
-        echo "initrd /intel-ucode.img" >> /boot/loader/entries/arch.conf
-    fi
 fi

@@ -75,6 +75,7 @@ if [ $partition_layout == "efi" ]; then
         echo t
         echo 1
         echo n
+        echo y
         echo
         echo
         echo
@@ -93,6 +94,7 @@ elif [ $partition_layout == "bios" ]; then
         echo t
         echo 4
         echo n
+        echo y
         echo
         echo
         echo
