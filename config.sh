@@ -542,6 +542,32 @@ done
 packages+=" dhcpcd"
 
 
+## VPN
+echo
+echo "Do you want to install Mullvad?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " system_vpn
+    system_vpn=${system_vpn}
+
+    # Install vpn
+    if [ $system_vpn == "y" ]; then
+        system_vpn="true"
+
+        break
+    elif [ $system_vpn == "n" ]; then
+        system_vpn="false"
+
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/system_vpn=.*/system_vpn=$system_vpn/" ./settings.sh
+
+
 ## Editor
 echo
 echo "Which editor do you want?"
@@ -570,6 +596,31 @@ while true; do
         break
     fi
 done
+
+
+## VScode
+echo
+echo "Do you want VS Code?"
+
+while true; do
+    
+    # User input
+    read -p "(Y/N) " software_vscode
+    software_vscode=${software_vscode,,}
+
+    if [ $software_vscode == "y" ]; then
+        software_vscode="true"
+        
+        break
+    elif [ $software_vscode == "n" ]; then
+        software_vscode="false"
+
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/software_vscode=.*/software_vscode=$software_vscode/" ./settings.sh
 
 
 ## Desktop envirnoment
@@ -644,6 +695,84 @@ fi
 # Export to file
 sed -i "s/system_desktop=.*/system_desktop=$system_desktop/" ./settings.sh
 sed -i "s/system_server=.*/system_server=$system_server/" ./settings.sh
+
+
+## Browser
+echo
+echo "What browser do you want?"
+echo "1) None"
+echo "2) Firefox"
+echo "3) Brave"
+echo "4) Google Chrome"
+
+while true; do
+
+    # User input
+    read -p "(1-4) " software_browser
+
+    # None
+    if [ $software_browser == "1" ]; then
+        software_browser="none"
+
+        break
+    
+    # Firefox
+    elif [ $software_browser == "2" ]; then
+        software_browser="firefox"
+
+        # Install
+        packages+=" firefox"
+
+        break
+    
+    # Brave
+    elif [ $software_browser == "3" ]; then
+        software_browser="brave"
+
+        break
+    
+    # Chrome
+    elif [ $software_browser == "4" ]; then
+        software_browser="chrome"
+
+        # Insult
+        echo
+        echo "Please reevaluate your life choices."
+
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/software_browser=.*/software_browser=$software_browser/" ./settings.sh
+
+
+## pCloud
+echo
+echo "Do you want pCloud to manage files?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " $software_pcloud
+    software_pcloud=${software_pcloud,,}
+
+    # pCloud
+    if [ $software_pcloud == "y" ]; then
+        software_pcloud="true"
+
+        break
+    
+    # No pCloud
+    elif [ $software_pcloud == "n" ]; then
+        software_pcloud="false"
+
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/software_pcloud=.*/software_pcloud=$software_pcloud/" ./settings.sh
 
 
 ## Export to file

@@ -13,6 +13,7 @@ system_bootloader=
 system_grub_delay=
 system_desktop=
 system_server=
+system_vpn=
 
 # DISK
 disk_name=
@@ -35,3 +36,8 @@ partition_root_format=
 
 # PACKAGES
 packages=
+
+# SOFTWARE
+software_browser=
+software_vscode=
+software_pcloud=

@@ -223,6 +223,13 @@ fi
 # DHCPCD
 systemctl enable dhcpcd
 
+# VPN
+if [ $system_vpn == "true" ]; then
+
+    # Install
+    yay -S --noconfirm --save --nocleanmenu --nodiffmenu mullvad-vpn-bin
+fi
+
 
 ## Login managers
 
@@ -233,6 +240,30 @@ if [ $system_desktop == "gnome" ]; then
 # Plasma
 elif [ $system_desktop == "plasma" ]; then
     systemctl enable sddm
+fi
+
+
+## Browser
+
+# Brave
+if [ $software_browser == "brave" ]; then
+    yay -S --noconfirm --save --nocleanmenu --nodiffmenu brave-bin
+
+# Chrome
+elif [ $software_browser == "chrome" ]; then
+    yay -S --noconfirm --save --nocleanmenu --nodiffmenu google-chrome
+fi
+
+
+## pCloud
+if [ $software_pcloud == "true" ]; then
+    yay -S --noconfirm --save --nocleanmenu --nodiffmenu pcloud-drive
+fi
+
+
+## Extension manager
+if [ $system_desktop == "gnome" ]; then
+    yay -S --noconfirm --save --nocleanmenu --nodiffmenu extension-manager
 fi
 
 
