@@ -123,10 +123,10 @@ if [ $crypt == true ]; then
 else
     # EXT4
     if [ $partition_root_format == "ext4" ]; then
-        mkfs.ext4 $partition_root
+        echo y | mkfs.ext4 $partition_root
     
     # BTRFS
-    elif [ $partition_root_format == "btrfs" ]; then
+    elif [ $partition_root_format == "btrfs" ]; thencat /
         mkfs.btrfs -f $partition_root
     fi
 
