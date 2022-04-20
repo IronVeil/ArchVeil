@@ -156,7 +156,9 @@ if [ $system_bootloader == "systemd-boot" ]; then
     echo "title Arch Linux" >> /boot/loader/entries/arch.conf
 
     # Kernel
-    echo "linux /vmlinuz-$system_kernel\ninitrd /${system_cpu}-ucode.img\ninitrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
+    echo "linux /vmlinuz-$system_kernel
+initrd /${system_cpu}-ucode.img
+initrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
     
     # Root
     if [ $crypt == "true" ]; then
