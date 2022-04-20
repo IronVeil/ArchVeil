@@ -394,7 +394,7 @@ while true; do
 done
 
 # Export to file
-sed =i "s/system_kernel=/system_kernel=$system_kernel/" ./settings.sh
+sed -i "s/system_kernel=/system_kernel=$system_kernel/" ./settings.sh
 
 
 ## Bootloader
