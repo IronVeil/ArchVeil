@@ -596,7 +596,16 @@ while true; do
         system_desktop="gnome"
 
         # Install
-        packages+=" gnome gnome-terminal nautilus python-nautilus gnome-tweak-tool"
+        packages+=" gnome gnome-terminal nautilus python-nautilus gnome-tweak-tool gdm"
+
+        break
+
+    # Plasma
+    elif [ $system_desktop == "4" ]; then
+        system_desktop="plasma"
+
+        # Install
+        packages+=" plasma sddm konsole kalendar dolphin"
 
         break
     fi

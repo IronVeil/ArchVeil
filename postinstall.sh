@@ -224,6 +224,18 @@ fi
 systemctl enable dhcpcd
 
 
+## Login managers
+
+# GNOME
+if [ $system_desktop == "gnome" ]; then
+    systemctl enable gdm
+
+# Plasma
+elif [ $system_desktop == "plasma" ]; then
+    systemctl enable sddm
+fi
+
+
 
 ### --- BOOTLOADER ---
 
