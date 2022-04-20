@@ -546,6 +546,37 @@ while true; do
 done
 
 
+## AUR
+echo
+echo "Do you want AUR support through yay?"
+
+while true; do
+
+    # User input
+    read -p "(Y/N) " extra_aur
+    extra_aur=${extra_aur,,}
+
+    # AUR
+    if [ $extra_aur == "y" ]; then
+        extra_aur=true
+
+        # Install
+        packages+=" go git"
+
+        break
+
+    # No AUR
+    elif [ $extra_aur == "n" ]; then
+        extra_aur=false
+
+        break
+    fi
+done
+
+# Export to file
+sed -i "s/extra_aur=.*/extra_aur=$extra_aur/" ./settings.sh
+
+
 ## Export to file
 sed -i "s/packages=.*/packages='$packages'/" ./settings.sh
 

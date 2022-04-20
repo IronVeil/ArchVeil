@@ -127,6 +127,25 @@ echo -e "$system_root_pass\n$system_root_pass" | passwd root
 
 
 
+### --- SOFTWARE ---
+
+## yay
+if [ $extra_aur == "true" ]; then
+
+    # Clone repo
+    cd /home/$system_user
+    su -c "git clone https://aur.archlinux.org/yay.git" $system_user
+    cd yay
+
+    # Make
+    su -c "makepkg -si" $system_user
+
+    # Remove dir
+    cd ../
+    rm -r yay
+fi
+
+
 ### --- SERVICES ---
 echo
 echo "------ Enabling services"

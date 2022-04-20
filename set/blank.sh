@@ -32,3 +32,6 @@ partition_root_format=
 
 # PACKAGES
 packages=
+
+# EXTRA
+extra_aur=
