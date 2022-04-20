@@ -129,6 +129,26 @@ fi
 echo
 echo "------ Setting up root"
 
+# Password
+echo -e "$system_root_pass\n$system_root_pass" | passwd root
+
+
+## Sudo
+echo
+echo "------ Setting up sudo"
+
+# Edit file
+echo "root ALL=(ALL:ALL) ALL
+%wheel ALL=(ALL:ALL) ALL
+@includedir /etc/sudoers.d
+Defaults pwfeedback
+Defaults insults" >> /etc/sudoers
+
+
+## Root
+echo
+echo "------ Setting up root"
+
 echo -e "$system_root_pass\n$system_root_pass" | passwd root
 
 
