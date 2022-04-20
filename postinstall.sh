@@ -164,7 +164,7 @@ if [ $extra_aur == "true" ]; then
     cd yay
 
     # Make
-    su -c "makepkg -si" $system_user
+    echo -e "$system_pass" | su -c "makepkg -si" $system_user
 
     # Remove dir
     cd ../
