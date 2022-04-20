@@ -158,6 +158,9 @@ echo -e "$system_root_pass\n$system_root_pass" | passwd root
 ## yay
 if [ $extra_aur == "true" ]; then
 
+    # Disable need for sudo password
+    echo "$system_user  ALL=(ALL) NOPASSWD=ALL" >> /etc/sudoers
+
     # Clone repo
     cd /home/$system_user
     su -c "git clone https://aur.archlinux.org/yay.git" $system_user
@@ -169,6 +172,10 @@ if [ $extra_aur == "true" ]; then
     # Remove dir
     cd ../
     rm -r yay
+
+    # Enable need for sudo password
+    sed '$d' /etc/sudoers
+
 fi
 
 
