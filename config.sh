@@ -75,10 +75,14 @@ while true; do
     # User input
     read -p "Password: " -s system_pass
     echo
+    read -p "Confirm Password: " -s system_pass2
+    echo
 
     # Validation
-    if [ ! -z $system_pass ]; then
+    if [ $system_pass == $system_pass2 ] && [ ! -z $system_pass ]; then
         break
+    else
+        echo "Passwords are not the same, try again."
     fi
 done
 
@@ -245,7 +249,7 @@ while true; do
             echo
 
             # Matching passwords
-            if [ $crypt_password == $crypt_password2 ]; then
+            if [ $crypt_password == $crypt_password2 ] && [ ! -z $crypt_password ]; then
                 break
             else
                 echo "Passwords are not the same, try again."
@@ -375,26 +379,47 @@ while true; do
 
     # linux
     if [ $package_kernel == "1" ]; then
-        packages+=" linux linux-headers"
         system_kernel="linux"
         break
     
     # linux-lts
     elif [ $package_kernel == "2" ]; then
-        packages+=" linux-lts linux-lts-headers"
         system_kernel="linux-lts"
         break
     
     # linux-zen
     elif [ $package_kernel == "3" ]; then
-        packages+=" linux-zen linux-zen-headers"
         system_kernel="linux-zen"
         break
     fi
 done
 
+# Install
+packages+=" $system_kernel ${system_kernel}-headers"
+
 # Export to file
 sed -i "s/system_kernel=/system_kernel=$system_kernel/" ./settings.sh
+
+
+## Microcode
+
+# CPU
+cpu=$(grep -m 1 'model name' /proc/cpuinfo)
+
+# AMD
+if [[ $cpu == *"AMD"* ]]; then
+    system_cpu="amd"
+
+# Intel
+elif [[ $cpu == *"Intel"* ]]; then
+    system_cpu="intel"
+fi
+
+# Install
+packages+=" ${system_cpu}-ucode"
+
+# Export to file
+sed -i "s/system_cpu=.*/system_cpu=$system_cpu/" ./settings.sh
 
 
 ## Bootloader
