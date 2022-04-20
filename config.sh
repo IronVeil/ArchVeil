@@ -602,8 +602,39 @@ while true; do
     fi
 done
 
+
+## Desktop server
+if [ $system_desktop != "none" ] ; then
+    echo
+    echo "Do you want X.ORG or Wayland?"
+
+    while true; do
+
+        # User input
+        read -p "(X/W) " system_server
+        system_server=${system_server,,}
+
+        # X.ORG
+        if [ $system_server == "x" ]; then
+            system_server="xorg"
+            packages+=" xorg"
+
+        # Wayland
+        elif [ $system_server == "w" ]; then
+            system_server="wayland"
+            packages+=" wayland"
+
+            # KDE
+            if [ $system_desktop == "plasma" ]; then
+                packages+=" plasma-wayland-session"
+            fi
+        fi
+    done
+fi
+
 # Export to file
 sed -i "s/system_desktop=.*/system_desktop=$system_desktop/" ./settings.sh
+sed -i "s/system_server=.*/system_server=$system_server/" ./settings.sh
 
 
 ## Export to file

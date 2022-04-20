@@ -12,6 +12,7 @@ system_kernel=
 system_bootloader=
 system_grub_delay=
 system_desktop=
+system_server=
 
 # DISK
 disk_name=
