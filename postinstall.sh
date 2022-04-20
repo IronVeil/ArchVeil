@@ -164,7 +164,7 @@ initrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
     if [ $crypt == "true" ]; then
         break
     else
-        uuid=$(blkid -o value -s UUID $disk_dir)
+        uuid=$(blkid -o value -s UUID ${partition_root})
         echo "options root=UUID=$uuid rw quiet splash" >> /boot/loader/entries/arch.conf
     fi
 
