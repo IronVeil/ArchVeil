@@ -120,13 +120,14 @@ if [ $crypt == true ]; then
     # Mount
     mount $crypt_partition /mnt
 
+# Plain
 else
     # EXT4
     if [ $partition_root_format == "ext4" ]; then
         echo y | mkfs.ext4 $partition_root
     
     # BTRFS
-    elif [ $partition_root_format == "btrfs" ]; thencat /
+    elif [ $partition_root_format == "btrfs" ]; then
         mkfs.btrfs -f $partition_root
     fi
 
