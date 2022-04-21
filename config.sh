@@ -311,7 +311,7 @@ wtf partition_root_format
 packages="base base-devel"
 
 # Firmware
-[[ $system_vm ]] || packages+=" linux-firmware"
+[[ "$system_vm" == "true" ]] || packages+=" linux-firmware"
 
 
 ## Kernel
