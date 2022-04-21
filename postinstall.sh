@@ -109,7 +109,7 @@ useradd -mG wheel $system_user
 echo -e "$system_pass\n$system_pass" | passwd $system_user
 
 # Autologin
-if [[ $system_user_autologin ]]; then
+if [[ "$system_user_autologin" == "true" ]]; then
     print "------ Setting up autologin for $system_user"
 
     # Enable autologin
@@ -234,7 +234,7 @@ fi
 
 
 ## pCloud
-[[ $software_pcloud ]] && aur "pcloud-drive"
+[[ "$software_pcloud" == "true" ]] && aur "pcloud-drive"
 
 
 ## Extension manager
@@ -251,7 +251,7 @@ print "------ Modifying mkinitcpio"
 sed -i "7s/.*/MODULES=($partition_root_format)/" /etc/mkinitcpio.conf
 
 # Encrypted
-[[ $crypt ]] && sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /etc/mkinitcpio.conf
+[[ "$crypt" == "true" ]] && sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /etc/mkinitcpio.conf
 
 # Rebuild kernel
 mkinitcpio -P
@@ -278,7 +278,7 @@ initrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
     uuid=$(blkid -o value -s UUID ${partition_root})
     
     # Root
-    if [[ $crypt ]]; then
+    if [[ "$crypt" == "true" ]]; then
         echo "options cryptdevice=${uuid}:${crypt_name} root=${crypt_partition} rw quiet splash" >> /boot/loader/entries/arch.conf
 
         # SSD TRIM support

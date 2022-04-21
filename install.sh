@@ -85,7 +85,7 @@ fi
 print "------ Formatting $disk_name"
 
 ## FDE
-if [[ $crypt ]]; then
+if [[ "$crypt" == "true" ]]; then
     echo -e $crypt_password | cryptsetup luksFormat $partition_root
     echo -e $crypt_password | cryptsetup open $partition_root $crypt_name
 
