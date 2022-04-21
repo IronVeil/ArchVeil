@@ -251,7 +251,7 @@ fi
 
 
 ## Games
-[[ "$software_games" == "true" ]] && aur "steam wine-staging proton-ge-custom-bin gamemode dxvk lutris polymc-bin gamemode"
+[[ "$software_games" == "true" ]] && aur "steam wine-staging proton-ge-custom-bin gamemode dxvk-bin lutris polymc-bin gamemode"
 
 
 
