@@ -620,7 +620,7 @@ wtf software_pcloud
 
 
 ## Export to file
-out=$packages
+out="$packages"
 wtf packages
 
 
