@@ -589,7 +589,7 @@ wtf software_browser
 
 
 ## pCloud
-print "Do you want pCloud to manage files?"
+print "Do you want install cloud-syncing software to manage files?"
 
 # User input
 input "(Y/n) " 1
@@ -598,7 +598,7 @@ input "(Y/n) " 1
 [[ "$out" == "n" ]] && out=false || out=true
 
 # Export to file
-wtf software_pcloud
+wtf software_cloud
 
 
 ## Export to file

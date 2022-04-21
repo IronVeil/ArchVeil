@@ -40,4 +40,4 @@ packages=
 # SOFTWARE
 software_browser=
 software_vscode=
-software_pcloud=
+software_cloud=

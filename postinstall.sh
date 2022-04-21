@@ -162,6 +162,26 @@ cd ../
 rm -r yay
 
 
+## nVidia drivers
+gpu=$(lspci | grep VGA)
+
+if [[ "$gpu" == *"NVIDIA"* ]]; then
+
+    # linux
+    if [[ "$system_kernel" == "linux" ]]; then
+        aur "nvidia"
+    
+    # linux-lts
+    elif [[ "$system_kernel" == "linux-lts" ]]; then
+        aur "nvidia-lts"
+    
+    # Others
+    else
+        aur "nvidia-dkms"
+    fi
+fi
+
+
 ## Performance services
 
 # Installing
@@ -191,6 +211,25 @@ aur "ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts"
 [[ "$system_desktop" != "none" ]] && aur "libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal"
 
 
+## Browser
+
+# Brave
+if [[ "$software_browser" == "brave" ]]; then
+    aur "brave-bin"
+
+# Chrome
+elif [[ "$software_browser" == "chrome" ]]; then
+    aur "google-chrome"
+fi
+
+
+## pCloud
+[[ "$software_cloud" == "true" ]] && aur "pcloud-drive nextcloud-client"
+
+
+## Extension manager
+[[ "$system_desktop" == "gnome" ]] && aur "extension-manager"
+
 ## Enable need for sudo password
 sed -i '$d' /etc/sudoers
 
@@ -219,26 +258,6 @@ if [[ "$system_desktop" == "gnome" ]]; then
 elif [[ "$system_desktop" == "plasma" ]]; then
     systemctl enable sddm
 fi
-
-
-## Browser
-
-# Brave
-if [[ "$software_browser" == "brave" ]]; then
-    aur "brave-bin"
-
-# Chrome
-elif [[ "$software_browser" == "chrome" ]]; then
-    aur "google-chrome"
-fi
-
-
-## pCloud
-[[ "$software_pcloud" == "true" ]] && aur "pcloud-drive"
-
-
-## Extension manager
-[[ "$system_desktop" == "gnome" ]] && aur "extension-manager"
 
 
 
