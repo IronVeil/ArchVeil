@@ -243,7 +243,7 @@ wtf disk_type
 
 
 ## Disk type
-out=$(cat /sys/block/${out}/queue/rotational)
+out=$(cat /sys/block/${disk_name}/queue/rotational)
 
 # SSD or HDD
 [[ "$out" == 1 ]] && out=hdd || out=ssd
@@ -304,6 +304,7 @@ if [[ "$out" == "efi" ]] && [[ "$disk_name" == "nvme" ]]; then
     # Change 1 to p1 and 2 to p2
     sed -i 's|partition_boot.*|partition_boot=/dev/${disk_name}p1|'
     sed -i 's|partition_root.*|partition_root=/dev/${disk_name}p2|'
+fi
 
 
 ## Format
