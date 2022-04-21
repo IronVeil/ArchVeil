@@ -201,6 +201,9 @@ echo 'ACTION=="add|change", KERNEL=="nvme[0-9]\*", ATTR{queue/scheduler}="none"
 ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]\*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="bfq"
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"' >> /etc/udev/rules.d/60-ioschedulers.rules
 
+# Tweak ext4
+[[ "$partition_root_format" == "ext4" ]] && sed -i "s/relatime/noatime,commit=15/" /etc/fstab
+
 
 ## Sound
 
@@ -216,6 +219,12 @@ aur "ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts"
 
 ## GUI tweaks
 [[ "$system_desktop" != "none" ]] && aur "libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal"
+
+# GNOME
+[[ "$system_desktop" == "gnome" ]] && pacman -Rnsc epiphany gnome-software gnome-music gnome-photos gnome-user-docs yelp
+
+# Plasma
+[[ "$system_desktop" == "plasma" ]] && pacman -Rnsc discover oxygen plasma_vault
 
 
 ## Browser
