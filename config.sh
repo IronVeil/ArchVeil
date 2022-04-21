@@ -411,6 +411,12 @@ wtf system_bootloader
 # GRUB stuff
 if [[ "$out" == "grub" ]]; then
 
+    # Installs
+    packages+=" grub os-prober"
+
+    # Installs efibootmgr if needed
+    [[ "$partition_layout" == "efi" ]] && packages+=" efibootmgr"
+
     # Delay
     print "Do you want a 5 second delay to select other operating systems?"
     
