@@ -41,8 +41,8 @@ input "(y/N) "
 print "------ Partitioning $disk_name"
 
 ## Unmount
-cryptsetup close /dev/mapper/*
 umount /dev/${disk_name}*
+cryptsetup close /dev/mapper/*
 
 
 ## EFI
