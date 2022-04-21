@@ -145,6 +145,7 @@ if [[ "$out" == "n" ]]; then
     while true; do
 
         # User input
+        echo
         read -p "Password: " -s out
         echo
         read -p "Confirm Password: " -s out2
@@ -174,6 +175,9 @@ input "(y/N) " 1
 
 # VM or bare metal
 [[ "$out" == "y" ]] && out=true || out=false
+
+# Sets system_vm as a variable
+system_vm=$out
 
 # Export to file
 wtf system_vm
@@ -276,7 +280,7 @@ if [[ "$out" == true ]]; then
         echo
 
         # Matching passwords
-        if [[ "$out" == "$out2" ]] && ][ ! -z "$out2" ]]; then
+        if [[ "$out" == "$out2" ]] && [[ ! -z "$out2" ]]; then
             break
         else
             echo "Passwords are not the same, try again."
@@ -308,39 +312,26 @@ fi
 
 
 ## Format
-echo
-echo "Do you want EXT4 or BTRFS?"
+print "Do you want EXT4 or BTRFS?"
 
-while true; do
+# User input
+input "(E/b) " 1
 
-    # User input
-    read -p "(E/B) " partition_root_format
-    partition_root_format=${partition_root_format,,}
-
-    # EXT4
-    if [ $partition_root_format == "e" ]; then
-        partition_root_format="ext4"
-        break
-    
-    # BTRFS
-    elif [ $partition_root_format == "b" ]; then
-        partition_root_format="btrfs"
-        break
-    fi
-done
+# EXT4 or BTRFS
+[[ "$out" == "b" ]] && out=btrfs || out=ext4
 
 # Export to file
-sed -i "s/partition_root_format=.*/partition_root_format=$partition_root_format/" ./settings.sh
+wtf partition_root_format
+
 
 
 ### --- SOFTWARE ---
 
 ## Base
-if [ $system_vm == "true" ]; then
-    packages+="base base-devel"
-else
-    packages+="base base-devel linux-firmware"
-fi
+packages="base base-devel"
+
+# Firmware
+[[ $system_vm ]] || packages+=" linux-firmware"
 
 
 ## Kernel
