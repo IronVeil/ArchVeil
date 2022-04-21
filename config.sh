@@ -283,8 +283,8 @@ wtf partition_layout
 if [[ "$out" == "efi" ]] && [[ "$disk_name" == "nvme" ]]; then
 
     # Change 1 to p1 and 2 to p2
-    sed -i 's|partition_boot.*|partition_boot=/dev/${disk_name}p1|'
-    sed -i 's|partition_root.*|partition_root=/dev/${disk_name}p2|'
+    sed -i 's|partition_boot.*|partition_boot=/dev/${disk_name}p1|' ./settings.sh
+    sed -i 's|partition_root.*|partition_root=/dev/${disk_name}p2|' ./settings.sh
 fi
 
 
