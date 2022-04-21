@@ -16,10 +16,19 @@ echo -ne "
 "
 
 
+### --- FUNCTIONS ---
+
+## Write to file
+writeToFile () {
+    sed -i "s/${1}=/${1}=${2}/" ./settings.sh
+}
+
+
+
 ### --- SETTINGS ---
 
 # Remove current
-rm settings.sh
+rm settings.sh &> /dev/null
 
 # Create blank copy
 cp ./set/blank.sh ./settings.sh
@@ -36,13 +45,12 @@ while true; do
     read -p "Name: " system_hostname
 
     # Validation
-    if [ ! -z system_hostname ]; then
-        break
-    fi
+    [[ ! -z "$system_hostname" ]] && break
+
 done
 
 # Export to file
-sed -i "s/system_hostname=.*/system_hostname=$system_hostname/" ./settings.sh
+writeToFile system_hostname $system_hostname
 
 
 
@@ -57,9 +65,7 @@ while true; do
     system_user=${system_user,,}
 
     # Validation
-    if [ ! -z $system_user ]; then
-        break
-    fi
+    [[ ! -z "$system_user" ]] && break
 done
 
 # Export to file
@@ -80,7 +86,10 @@ while true; do
 
     # Validation
     if [ $system_pass == $system_pass2 ] && [ ! -z $system_pass ]; then
-        break
+        
+        # Check if blank
+        [[ ! -z "$system_pass" ]] && break
+
     else
         echo "Passwords are not the same, try again."
     fi
@@ -97,23 +106,25 @@ echo "Do you want $system_user to autologin?"
 while true; do
 
     # User input
-    read -p "(Y/N) " system_user_autologin
+    read -p "(y/N) " system_user_autologin
     system_user_autologin=${system_user_autologin,,}
 
     # Autologin
     if [ $system_user_autologin == "y" ]; then
         system_user_autologin=true
+
         break
 
     # Manual login
     else
         system_user_autologin=false
+
         break
     fi
 done
 
 # Export to file
-sed -i "s/system_user_autologin=.*/system_user_autologin=$system_user_autologin/" ./settings.sh
+sed -i "s/system_user_autologin=/system_user_autologin=$system_user_autologin/" ./settings.sh
 
 
 ## Root password
@@ -186,8 +197,10 @@ disks=($(lsblk -n --output TYPE,KNAME | awk '$1=="disk"{print "/dev/"$2}'))
 ## Selection
 echo
 
-# Output
+# Get number of disks
 len=${#disks[@]}
+
+# Output them
 for (( i=0; i<$len; i++ )); do
     echo "${disks[$i]}"
 done
@@ -204,7 +217,7 @@ while $diskcheck; do
     disk_dir="/dev/$disk_name"
 
     # SATA
-    if [[ $disk_name == *"sd"* ]]; then
+    if [[ $disk_name == *"sd"* ]] || [[ $disk_name == *"vd"* ]]; then
         disk_type="sata"
     
     # NVME
@@ -214,8 +227,11 @@ while $diskcheck; do
 
     # Checks if disk exists
     for (( i=0; i<$len; i++ )); do
+
+        # Matching
         if [[ $disk_dir == "${disks[$i]}" ]]; then
             diskcheck=false
+
             break
         fi
     done
@@ -301,53 +317,42 @@ done
 
 
 ## EFI or BIOS
-echo
-echo "Is this an EFI or BIOS system?"
+[ -d /sys/firmware/efi ] && partition_layout="efi" || partition_layout="bios"
 
-while true; do
+# Partitions
+partition_bios=false
+partition_boot=false
 
-    # User input
-    read -p "(E/B) " partition_layout
-    partition_layout=${partition_layout,,}
-    partition_bios=false
-    partition_boot=false
+# EFI system
+if [ $partition_layout == "efi" ]; then
 
-    # EFI system
-    if [ $partition_layout == "e" ]; then
-        partition_layout="efi"
+    # Partitions for SATA drive
+    if [ $disk_type == "sata" ]; then
+        partition_boot=$disk_dir"1"
+        partition_root=$disk_dir"2"
 
-        # Partitions for SATA drive
-        if [ $disk_type == "sata" ]; then
-            partition_boot=$disk_dir"1"
-            partition_root=$disk_dir"2"
-
-        # Partitions for NVME drive
-        elif [ $disk_type == "nvme" ]; then
-            partition_boot=$disk_dir"p1"
-            partition_root=$disk_dir"p2"
-        fi
-
-        break
-
-    # BIOS system
-    elif [ $partition_layout == "b" ]; then
-        partition_layout="bios"
-
-        # Partitions for SATA drive
-        if [ $disk_type == "sata" ]; then
-            partition_bios=$disk_dir"1"
-            partition_root=$disk_dir"2"
-
-        # Partitions for NVME drive
-        elif [ $disk_type == "nvme" ]; then
-            partition_bios=$diskdir"p1"
-            partition_root=$disk_dir"p2"
-        fi
-
-        break
+    # Partitions for NVME drive
+    elif [ $disk_type == "nvme" ]; then
+        partition_boot=$disk_dir"p1"
+        partition_root=$disk_dir"p2"
     fi
-done
 
+# BIOS system
+elif [ $partition_layout == "b" ]; then
+
+    # Partitions for SATA drive
+    if [ $disk_type == "sata" ]; then
+        partition_bios=$disk_dir"1"
+        partition_root=$disk_dir"2"
+
+    # Partitions for NVME drive
+    elif [ $disk_type == "nvme" ]; then
+        partition_bios=$diskdir"p1"
+        partition_root=$disk_dir"p2"
+    fi
+fi
+
+# Export to file
 sed -i "s~partition_boot=.*~partition_boot=$partition_boot~" ./settings.sh
 sed -i "s~partition_bios=.*~partition_bios=$partition_bios~" ./settings.sh
 sed -i "s~partition_root=.*~partition_root=$partition_root~" ./settings.sh
