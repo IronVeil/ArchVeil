@@ -23,8 +23,8 @@ disk_dir=
 
 # ENCRYPTION
 crypt=
-crypt_name="cryptroot"
-crypt_partition=/dev/mapper/$crypt_name
+crypt_name=cryptroot
+crypt_partition="/dev/mapper/$crypt_name"
 crypt_password=
 
 # PARTITIONS

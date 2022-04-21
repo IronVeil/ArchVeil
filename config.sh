@@ -20,7 +20,14 @@ echo -ne "
 
 ## Write to file
 writeToFile () {
-    sed -i "s/${1}=/${1}=${2}/" ./settings.sh
+    sed -i "s|${1}=|${1}=${2}|" ./settings.sh
+}
+
+
+## Print
+print () {
+    echo
+    echo $1
 }
 
 
@@ -36,8 +43,7 @@ cp ./set/blank.sh ./settings.sh
 
 
 ### --- HOSTNAME ---
-echo
-echo "Please enter the name of the new system."
+print "Please enter the name of the new system."
 
 while true; do
     
@@ -201,14 +207,8 @@ while $diskcheck; do
     read -p "/dev/" disk_name
     disk_dir="/dev/$disk_name"
 
-    # SATA
-    if [[ $disk_name == *"sd"* ]] || [[ $disk_name == *"vd"* ]]; then
-        disk_type="sata"
-    
-    # NVME
-    elif [[ $disk_name == *"nvme"* ]]; then
-        disk_type="nvme"
-    fi
+    # Default disk
+    [[ ! -z $disk_name ]] && disk_name=$disks[0]
 
     # Checks if disk exists
     for (( i=0; i<$len; i++ )); do
@@ -222,83 +222,75 @@ while $diskcheck; do
     done
 done
 
+# Checks if disk is SATA or NVME
+
+# SATA
+if [[ $disk_name == *"sd"* ]] || [[ $disk_name == *"vd"* ]]; then
+    disk_type=sata
+
+# NVME
+elif [[ $disk_name == *"nvme"* ]]; then
+    disk_type=nvme
+fi
+
 # Export to file
-sed -i "s/disk_name=.*/disk_name=$disk_name/" ./settings.sh
-sed -i "s/disk_type=.*/disk_type=$disk_type/" ./settings.sh
-sed -i "s~disk_dir=.*~disk_dir=$disk_dir~" ./settings.sh
+writeToFile disk_name $disk_name
+writeToFile disk_type $disk_type
+writeToFile disk_dir $disk_dir
 
 
 ## Disk type
-echo
-echo "Is it an SSD or HDD?"
+disk_speed=$(cat /sys/block/${disk_name}/queue/rotational)
 
-while true; do
-
-    # User input
-    read -p "(S/H) " disk_speed
-    disk_speed=${disk_speed,,}
-
-    # SSD
-    if [ $disk_speed == "s" ]; then
-        disk_speed="ssd"
-        break
-    
-    # HDD
-    elif [ $disk_speed == "h" ]; then
-        disk_speed="hdd"
-        break
-    fi
-done
-
-# Export to file
-sed -i "s/disk_speed=.*/disk_speed=$disk_speed/" ./settings.sh
+# SSD or HDD
+[[ $disk_speed == 1 ]] && disk_speed=hdd || disk_speed=ssd
 
 
 ## Full disk encryption
 echo
 echo "Do you want full disk encryption?"
 
-while true; do
+# User input
+read -p "(y/N) " crypt
+crypt=${crypt,,}
 
-    # User input
-    read -p "(Y/N) " crypt
-    crypt=${crypt,,}
+# Enable or disable crypt
+[[ "$crypt" == "y" ]] && crypt=true || crypt=false
 
-    # Encryption
-    if [ $crypt == "y" ]; then
+# Password
+if [[ $crypt == true ]]; then
 
-        # Password input
-        while true; do
-            echo
-            read -p "Please enter a password: " -s crypt_password
-            echo
-            read -p "Please enter it again: " -s crypt_password2
-            echo
+    # Password input
+    while true; do
+        echo
+        read -p "Please enter a password: " -s crypt_password
+        echo
+        read -p "Please enter it again: " -s crypt_password2
+        echo
 
-            # Matching passwords
-            if [ $crypt_password == $crypt_password2 ] && [ ! -z $crypt_password ]; then
-                break
-            else
-                echo "Passwords are not the same, try again."
-            fi
-        done
+        # Matching passwords
+        if [ $crypt_password == $crypt_password2 ] && [ ! -z $crypt_password ]; then
+            break
+        else
+            echo "Passwords are not the same, try again."
+        fi
+    done
 
-        # Export to file
-        sed -i "s/crypt=.*/crypt=true/" ./settings.sh
-        sed -i "s/crypt_password=.*/crypt_password=$crypt_password/" ./settings.sh
+    # Export to file
+    sed -i "s/crypt=.*/crypt=true/" ./settings.sh
+    sed -i "s/crypt_password=.*/crypt_password=$crypt_password/" ./settings.sh
 
-        break
-    
-    # Plain
-    elif [ $crypt == "n" ]; then
+    break
 
-        # Export to file
-        sed -i "s/crypt=.*/crypt=false/" ./settings.sh
-        sed -i "s/crypt_password=.*/crypt_password=false/" ./settings.sh
+# Plain
+elif [ $crypt == "n" ]; then
 
-        break
-    fi
-done
+    # Export to file
+    sed -i "s/crypt=.*/crypt=false/" ./settings.sh
+    sed -i "s/crypt_password=.*/crypt_password=false/" ./settings.sh
+
+    break
+fi
 
 
 ## EFI or BIOS
