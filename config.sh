@@ -335,39 +335,38 @@ packages="base base-devel"
 
 
 ## Kernel
-echo
-echo "Which kernel do you want?"
-echo "1) linux"
+print "Which kernel do you want?"
+echo "1) linux *"
 echo "2) linux-lts"
 echo "3) linux-zen"
 
-while true; do
+# User input
+input "(1-3) "
 
-    # User input
-    read -p "(1-3) " package_kernel
+# Selects kernel
+case $out in
+
+    # linux-lts
+    2)
+        out=linux-lts
+        ;;
+
+    # linux-zen
+    3)
+        out=linux-zen
+        ;;
 
     # linux
-    if [ $package_kernel == "1" ]; then
-        system_kernel="linux"
-        break
-    
-    # linux-lts
-    elif [ $package_kernel == "2" ]; then
-        system_kernel="linux-lts"
-        break
-    
-    # linux-zen
-    elif [ $package_kernel == "3" ]; then
-        system_kernel="linux-zen"
-        break
-    fi
-done
+    *)
+        out=linux
+        ;;
+esac
 
 # Install
-packages+=" $system_kernel ${system_kernel}-headers"
+packages+=" $out ${out}-headers"
 
 # Export to file
-sed -i "s/system_kernel=/system_kernel=$system_kernel/" ./settings.sh
+wtf system_kernel
 
 
 ## Microcode
