@@ -29,9 +29,9 @@ crypt_password=
 
 # PARTITIONS
 partition_layout=
-partition_bios=
-partition_boot=
-partition_root=
+partition_bios="/dev/${disk_name}1"
+partition_boot="/dev/${disk_name}1"
+partition_root="/dev/${disk_name}2"
 partition_root_format=
 
 # PACKAGES

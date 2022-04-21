@@ -210,29 +210,36 @@ while $diskcheck; do
     for (( i=0; i<$len; i++ )); do
 
         # Matching
-        if [[ "$out" == *"${disks[$i]}" ]]; then
+        if [[ "/dev/{$out}" == "${disks[$i]}" ]]; then
             diskcheck=false
             break
         fi
     done
 done
 
+# Set disk_name as a variable
+disk_name=$out
+
 # Export to file
 wtf disk_name
 
-# Checks if disk is SATA or NVME
+
+## Checks if disk is SATA or NVME
 
 # SATA
-if [[ "$out" == *"sd"* ]] || [[ "$out" == *"vd"* ]]; then
+if [[ "$disk_name" == *"sd"* ]] || [[ "$disk_name" == *"vd"* ]]; then
     out=sata
 
 # NVME
-elif [[ "$out" == *"nvme"* ]]; then
+elif [[ "$disk_name" == *"nvme"* ]]; then
     out=nvme
 fi
 
+# Set disk_type as a variable
+disk_type=$out
+
 # Export to file
-wtf disk_name
+wtf disk_type
 
 
 ## Disk type
@@ -246,29 +253,30 @@ wtf disk_speed
 
 
 ## Full disk encryption
-echo
-echo "Do you want full disk encryption?"
+print "Do you want full disk encryption?"
 
 # User input
-read -p "(y/N) " crypt
-crypt=${crypt,,}
+input "(y/N) " 1
 
 # Enable or disable crypt
-[[ "$crypt" == "y" ]] && crypt=true || crypt=false
+[[ "$out" == "y" ]] && out=true || out=false
+
+# Export to file
+wtf crypt
 
 # Password
-if [[ $crypt == true ]]; then
+if [[ "$out" == true ]]; then
 
     # Password input
     while true; do
         echo
-        read -p "Please enter a password: " -s crypt_password
+        read -p "Please enter a password: " -s out
         echo
-        read -p "Please enter it again: " -s crypt_password2
+        read -p "Please enter it again: " -s out2
         echo
 
         # Matching passwords
-        if [ $crypt_password == $crypt_password2 ] && [ ! -z $crypt_password ]; then
+        if [[ "$out" == "$out2" ]] && ][ ! -z "$out2" ]]; then
             break
         else
             echo "Passwords are not the same, try again."
@@ -276,64 +284,26 @@ if [[ $crypt == true ]]; then
     done
 
     # Export to file
-    sed -i "s/crypt=.*/crypt=true/" ./settings.sh
-    sed -i "s/crypt_password=.*/crypt_password=$crypt_password/" ./settings.sh
-
-    break
-
-# Plain
-elif [ $crypt == "n" ]; then
-
-    # Export to file
-    sed -i "s/crypt=.*/crypt=false/" ./settings.sh
-    sed -i "s/crypt_password=.*/crypt_password=false/" ./settings.sh
-
-    break
+    wtf crypt_password
 fi
 
 
 ## EFI or BIOS
-[ -d /sys/firmware/efi ] && partition_layout="efi" || partition_layout="bios"
-
-# Partitions
-partition_bios=false
-partition_boot=false
-
-# EFI system
-if [ $partition_layout == "efi" ]; then
-
-    # Partitions for SATA drive
-    if [ $disk_type == "sata" ]; then
-        partition_boot=$disk_dir"1"
-        partition_root=$disk_dir"2"
-
-    # Partitions for NVME drive
-    elif [ $disk_type == "nvme" ]; then
-        partition_boot=$disk_dir"p1"
-        partition_root=$disk_dir"p2"
-    fi
-
-# BIOS system
-elif [ $partition_layout == "b" ]; then
-
-    # Partitions for SATA drive
-    if [ $disk_type == "sata" ]; then
-        partition_bios=$disk_dir"1"
-        partition_root=$disk_dir"2"
-
-    # Partitions for NVME drive
-    elif [ $disk_type == "nvme" ]; then
-        partition_bios=$diskdir"p1"
-        partition_root=$disk_dir"p2"
-    fi
-fi
+[[ -d /sys/firmware/efi ]] && out=efi || out=bios
 
 # Export to file
-sed -i "s~partition_boot=.*~partition_boot=$partition_boot~" ./settings.sh
-sed -i "s~partition_bios=.*~partition_bios=$partition_bios~" ./settings.sh
-sed -i "s~partition_root=.*~partition_root=$partition_root~" ./settings.sh
-sed -i "s~partition_layout=.*~partition_layout='$partition_layout'~" ./settings.sh
+wtf partition_layout
 
+# Partitions
+#partition_bios=false
+#partition_boot=false
+
+# EFI system
+if [[ "$out" == "efi" ]] && [[ "$disk_name" == "nvme" ]]; then
+
+    # Change 1 to p1 and 2 to p2
+    sed -i 's|partition_boot.*|partition_boot=/dev/${disk_name}p1|'
+    sed -i 's|partition_root.*|partition_root=/dev/${disk_name}p2|'
 
 
 ## Format
