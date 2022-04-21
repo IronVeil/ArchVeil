@@ -17,8 +17,8 @@ echo -ne "
 
 
 ### --- VARIABLES ---
-source ./install/settings.sh
-source ./install/func.sh
+source /install/settings.sh
+source /install/func.sh
 
 
 
