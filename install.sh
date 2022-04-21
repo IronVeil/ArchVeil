@@ -42,7 +42,7 @@ print "------ Partitioning $disk_name"
 
 ## Unmount
 umount /dev/${disk_name}*
-cryptsetup close /dev/mapper/*
+cryptsetup close $crypt_partition
 
 
 ## EFI
