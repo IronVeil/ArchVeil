@@ -207,6 +207,9 @@ ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue
 
 ## Sound
 
+# Remove pulseaudio
+pacman -Rs pulseaudio
+
 # Installing
 aur "pipewire-pulse pipewire-jack lib32-pipewire-jack alsa-plugins alsa-firmware sof-firmware alsa-card-profiles"
 
@@ -221,10 +224,10 @@ aur "ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts"
 [[ "$system_desktop" != "none" ]] && aur "libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal"
 
 # GNOME
-[[ "$system_desktop" == "gnome" ]] && pacman -Rnsc epiphany gnome-software gnome-music gnome-photos gnome-user-docs yelp
+[[ "$system_desktop" == "gnome" ]] && pacman -Rnsc --noconfirm epiphany gnome-software gnome-music gnome-photos gnome-user-docs yelp
 
 # Plasma
-[[ "$system_desktop" == "plasma" ]] && pacman -Rnsc discover oxygen plasma_vault
+[[ "$system_desktop" == "plasma" ]] && pacman -Rnsc --noconfirm discover oxygen plasma_vault
 
 
 ## Browser
@@ -245,9 +248,6 @@ fi
 
 ## Extension manager
 [[ "$system_desktop" == "gnome" ]] && aur "extension-manager"
-
-## Enable need for sudo password
-sed -i '$d' /etc/sudoers
 
 
 ## Games
@@ -287,6 +287,9 @@ elif [[ "$system_desktop" == "plasma" ]]; then
     systemctl enable sddm
 fi
 
+
+## Enable need for sudo password
+sed -i '$d' /etc/sudoers
 
 
 ### --- BOOTLOADER ---
