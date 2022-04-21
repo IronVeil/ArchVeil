@@ -266,7 +266,14 @@ print "------ Enabling services"
 systemctl enable dhcpcd
 
 # VPN
-[[ "$system_vpn" == "true" ]] && aur "mullvad-vpn-bin"
+if [[ "$system_vpn" == "true" ]]; then
+
+    # Install
+    aur "mullvad-vpn-bin"
+
+    # Enable
+    systemctl enable mullvad-daemon
+fi
 
 
 ## Login managers
