@@ -205,10 +205,6 @@ while $diskcheck; do
 
     # User input
     input "/dev/" 1
-   # disk_dir="/dev/$disk_name"
-
-    # Default disk
-    [[ ! -z "$out" ]] && out="$disks[0]"
 
     # Checks if disk exists
     for (( i=0; i<$len; i++ )); do
