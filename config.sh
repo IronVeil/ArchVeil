@@ -19,7 +19,7 @@ echo -ne "
 ### --- FUNCTIONS ---
 
 ## Write to file
-writeToFile () { sed -i "s|${1}=|${1}=${out}|" ./settings.sh; }
+wtf () { sed -i "s|${1}=|${1}=${out}|" ./settings.sh; }
 
 
 ## Print
@@ -70,7 +70,7 @@ while true; do
 done
 
 # Export to file
-writeToFile system_hostname
+wtf system_hostname
 
 
 
@@ -91,7 +91,7 @@ done
 system_user=$out
 
 # Export to file
-writeToFile system_user
+wtf system_user
 
 
 ## Password
@@ -113,8 +113,11 @@ while true; do
     fi
 done
 
+# Create system_user variable
+system_pass=$out
+
 # Export to file
-writeToFile system_pass
+wtf system_pass
 
 
 ## Autologin
@@ -127,7 +130,7 @@ input "(y/N) " 1
 [[ "$out" == "y" ]] && out=true || out=false
 
 # Export to file
-writeToFile system_user_autologin
+wtf system_user_autologin
 
 
 ## Root password
@@ -159,7 +162,7 @@ else
 fi
 
 # Export to file
-writeToFile system_root_pass
+wtf system_root_pass
 
 
 
@@ -173,7 +176,7 @@ input "(y/N) " 1
 [[ "$out" == "y" ]] && out=true || out=false
 
 # Export to file
-writeToFile system_vm
+wtf system_vm
 
 
 
@@ -194,54 +197,56 @@ for (( i=0; i<$len; i++ )); do
     echo "${disks[$i]}"
 done
 
-echo
-echo "Which disk do you want to install to?"
+print "Which disk do you want to install to?"
 
 diskcheck=true
 
 while $diskcheck; do
 
     # User input
-    read -p "/dev/" disk_name
-    disk_dir="/dev/$disk_name"
+    input "/dev/" 1
+   # disk_dir="/dev/$disk_name"
 
     # Default disk
-    [[ ! -z $disk_name ]] && disk_name=$disks[0]
+    [[ ! -z "$out" ]] && out="$disks[0]"
 
     # Checks if disk exists
     for (( i=0; i<$len; i++ )); do
 
         # Matching
-        if [[ $disk_dir == "${disks[$i]}" ]]; then
+        if [[ "$out" == *"${disks[$i]}" ]]; then
             diskcheck=false
-
             break
         fi
     done
 done
 
+# Export to file
+wtf disk_name
+
 # Checks if disk is SATA or NVME
 
 # SATA
-if [[ $disk_name == *"sd"* ]] || [[ $disk_name == *"vd"* ]]; then
-    disk_type=sata
+if [[ "$out" == *"sd"* ]] || [[ "$out" == *"vd"* ]]; then
+    out=sata
 
 # NVME
-elif [[ $disk_name == *"nvme"* ]]; then
-    disk_type=nvme
+elif [[ "$out" == *"nvme"* ]]; then
+    out=nvme
 fi
 
 # Export to file
-writeToFile disk_name $disk_name
-writeToFile disk_type $disk_type
-writeToFile disk_dir $disk_dir
+wtf disk_name
 
 
 ## Disk type
-disk_speed=$(cat /sys/block/${disk_name}/queue/rotational)
+out=$(cat /sys/block/${out}/queue/rotational)
 
 # SSD or HDD
-[[ $disk_speed == 1 ]] && disk_speed=hdd || disk_speed=ssd
+[[ "$out" == 1 ]] && out=hdd || out=ssd
+
+# Export to file
+wtf disk_speed
 
 
 ## Full disk encryption

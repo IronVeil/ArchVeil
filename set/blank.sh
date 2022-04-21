@@ -19,7 +19,7 @@ system_vpn=
 disk_name=
 disk_type=
 disk_speed=
-disk_dir=
+disk_dir="/dev/$disk_name"
 
 # ENCRYPTION
 crypt=
