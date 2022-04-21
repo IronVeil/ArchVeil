@@ -194,6 +194,13 @@ systemctl enable ananicy-cpp irqbalance memavaild nohang preload prelockd uresou
 # Enable zram checking
 sed -i 's|zram_checking_enabled = False|zram_checking_enabled = True|g' /etc/nohang/nohang.conf
 
+# Set up schedulers
+mkdir -p /etc/udev/rules.d/
+
+echo 'ACTION=="add|change", KERNEL=="nvme[0-9]\*", ATTR{queue/scheduler}="none"
+ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]\*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="bfq"
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"' >> /etc/udev/rules.d/60-ioschedulers.rules
+
 
 ## Sound
 
@@ -232,6 +239,11 @@ fi
 
 ## Enable need for sudo password
 sed -i '$d' /etc/sudoers
+
+
+## Games
+[[ "$software_games" == "true" ]] && aur "steam wine-staging proton-ge-custom-bin gamemode dxvk lutris polymc-bin gamemode"
+
 
 
 ### --- SERVICES ---

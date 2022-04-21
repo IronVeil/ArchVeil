@@ -41,3 +41,4 @@ packages=
 software_browser=
 software_vscode=
 software_cloud=
+software_games=

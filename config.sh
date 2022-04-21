@@ -601,6 +601,19 @@ input "(Y/n) " 1
 wtf software_cloud
 
 
+## Gaming
+print "Do you want to install gaming services?"
+
+# User input
+input "(y/N) " 1
+
+# Installs gaming stuff or not
+[[ "$out" == "y" ]] && out=true || out=false
+
+# Export to file
+wtf software_games
+
+
 ## Export to file
 out="$packages"
 
