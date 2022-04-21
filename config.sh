@@ -66,10 +66,11 @@ while true; do
 
     # Validation
     [[ ! -z "$system_user" ]] && break
+
 done
 
 # Export to file
-sed -i "s/system_user=.*/system_user=$system_user/" ./settings.sh
+writeToFile system_user $system_user
 
 
 ## Password
@@ -85,79 +86,74 @@ while true; do
     echo
 
     # Validation
-    if [ $system_pass == $system_pass2 ] && [ ! -z $system_pass ]; then
-        
-        # Check if blank
-        [[ ! -z "$system_pass" ]] && break
-
+    if [ $system_pass == $system_pass2 ] && [[] ! -z "$system_pass" ]]; then
+        break
     else
         echo "Passwords are not the same, try again."
     fi
 done
 
 # Export to file
-sed -i "s/system_pass=.*/system_pass=$system_pass/" ./settings.sh
+writeToFile system_pass $system_pass
 
 
 ## Autologin
 echo
 echo "Do you want $system_user to autologin?"
 
-while true; do
+# User input
+read -p "(y/N) " system_user_autologin
+system_user_autologin=${system_user_autologin,,}
 
-    # User input
-    read -p "(y/N) " system_user_autologin
-    system_user_autologin=${system_user_autologin,,}
+# Autologin
+if [ $system_user_autologin == "y" ]; then
+    system_user_autologin=true
 
-    # Autologin
-    if [ $system_user_autologin == "y" ]; then
-        system_user_autologin=true
+    break
 
-        break
+# Manual login
+else
+    system_user_autologin=false
 
-    # Manual login
-    else
-        system_user_autologin=false
-
-        break
-    fi
-done
+    break
+fi
 
 # Export to file
-sed -i "s/system_user_autologin=/system_user_autologin=$system_user_autologin/" ./settings.sh
+writeToFile system_user_autologin $system_user_autologin
 
 
 ## Root password
 echo
 echo "Do you want the root password to be the same as the user password?"
 
-while true; do
-
-    # User input
-    read -p "(Y/N) " root_same
-    root_same=${root_same,,}
-
-    if [ $root_same == "y" ]; then
-        system_root_pass=$system_pass
-        break
-    fi
-done
+# User input
+read -p "(Y/n) " root_same
+root_same=${root_same,,}
 
 # Password input
 if [ $root_same == "n" ]; then
 
-    # User input
-    read -p "Root Password: " -s system_root_pass
-    echo
+    while true; do
 
-    # Validation
-    if [ ! -z system_root_pass ]; then
-        break
-    fi
+        # User input
+        read -p "Password: " -s system_root_pass
+        echo
+        read -p "Confirm Password: " -s system_root_pass2
+        echo
+
+        # Validation
+        if [ $system_root_pass == $system_root_pass2 ] && [[ ! -z "$system_root_pass" ]]; then
+            break
+        else
+            echo "Passwords are not the same, try again."
+        fi
+    done
+else
+    system_root_pass=$system_pass
 fi
 
 # Export to file
-sed -i "s/system_root_pass=.*/system_root_pass=$system_root_pass/" ./settings.sh
+writeToFile system_root_pass $system_root_pass
 
 
 
@@ -165,26 +161,15 @@ sed -i "s/system_root_pass=.*/system_root_pass=$system_root_pass/" ./settings.sh
 echo
 echo "Is this a VM?"
 
-while true; do
+# User input
+read -p "(y/N) " system_vm
+system_vm=${system_vm,,}
 
-    # User input
-    read -p "(Y/N) " system_vm
-    system_vm=${system_vm,,}
-
-    # VM
-    if [ $system_vm == "y" ]; then
-        system_vm=true
-        break
-    
-    # Bare metal
-    elif [ $system_vm == "n" ]; then
-        system_vm=false
-        break
-    fi
-done
+# VM or bare metal
+[ $system_vm == "y" ] && system_vm=true || system_vm=false
 
 # Export to file
-sed -i "s/system_vm=.*/system_vm=$system_vm/" ./settings.sh
+writeToFile system_vm $system_vm
 
 
 
