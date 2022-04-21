@@ -25,3 +25,7 @@ input () {
     # Lowercase it
     [[ "$2" == "1" ]] && lower $inp || out=$inp
 }
+
+
+## AUR install
+aur () { su -c "yay -S --noconfirm --save --nocleanmenu --nodiffmenu $1" $system_user; }

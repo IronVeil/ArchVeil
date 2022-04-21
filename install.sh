@@ -18,53 +18,34 @@ echo -ne "
 
 ### --- VARIABLES ---
 source ./settings.sh
+source ./func.sh
 
 
 
 ### --- CONFIRMATION ---
-echo
-echo "Summary:"
-echo
-echo "Disk $disk_name will be formatted with a(n) $partition_layout layout."
 
-if [ $crypt == true ]; then
-    echo "The root will be encrypted with the name $crypt_name, mounted on $crypt_partition and with the password of $crypt_password. It will have the $partition_root_format filesystem."
-else
-    echo "The root will be formatted as $partition_root_format."
-fi
-
-if [ system_vm == true ]; then
-    echo "The system is a VM and is called $system_hostname."
-else
-    echo "The system will be called $system_hostname"
-fi
-
-echo "The base packages to install are: $packages"
+# TODO: List information
 
 ## Confirm
-while true; do
-    echo
-    echo "Are you sure you want to do this? Type 'YES' in capital letters."
+print "Are you sure you want to do this? Type 'YES' in capital letters."
 
-    read -p "> " confirm
+# User input
+input "(y/N) "
 
-    if [ $confirm == "YES" ]; then
-        break
-    else
-        exit
-    fi
-done
+# Installs or not
+[[ "$out" == "YES" ]] || exit
+
 
 
 ### --- PARTITION ---
-echo "------ Partitioning $disk_name"
+print "------ Partitioning $disk_name"
 
 ## Unmount
-umount /dev/sda*
+umount /dev/${disk_name}*
 
 
 ## EFI
-if [ $partition_layout == "efi" ]; then
+if [[ "$partition_layout" == "efi" ]]; then
     (
         echo g
         echo n
@@ -82,7 +63,7 @@ if [ $partition_layout == "efi" ]; then
     ) | fdisk $disk_dir
 
 ## BIOS
-elif [ $partition_layout == "bios" ]; then
+elif [[ "$partition_layout" == "bios" ]]; then
     (
         echo g
         echo n
@@ -101,35 +82,23 @@ elif [ $partition_layout == "bios" ]; then
 fi
 
 
-echo "------ Formatting $disk_name"
+print "------ Formatting $disk_name"
 
 ## FDE
-if [ $crypt == true ]; then
-    echo $crypt_password | cryptsetup luksFormat $partition_root
-    echo $crypt_password | cryptsetup open $partition_root $crypt_name
+if [[ $crypt ]]; then
+    echo -e $crypt_password | cryptsetup luksFormat $partition_root
+    echo -e $crypt_password | cryptsetup open $partition_root $crypt_name
 
-    # EXT4
-    if [ $partition_root_format == "ext4" ]; then
-        mkfs.ext4 $crypt_partition
-    
-    # BTRFS
-    elif [ $partition_root_format == "btrfs" ]; then
-        mkfs.btrfs $crypt_partition
-    fi
+    # Formats it
+    [[ "$partition_root_format" == "ext4" ]] && mkfs.ext4 $crypt_partition || mkfs.btrfs -f $crypt_partition
 
-    # Mount
+    # Mounts it
     mount $crypt_partition /mnt
 
 # Plain
 else
-    # EXT4
-    if [ $partition_root_format == "ext4" ]; then
-        echo y | mkfs.ext4 $partition_root
-    
-    # BTRFS
-    elif [ $partition_root_format == "btrfs" ]; then
-        mkfs.btrfs -f $partition_root
-    fi
+    # Formats it
+    [[ "$partition_root_format" == "ext4" ]] && echo | mkfs.ext4 $partition_root || mkfs.btrfs -f $partition_root
 
     # Mount
     mount $partition_root /mnt
@@ -137,7 +106,7 @@ fi
 
 
 ## Boot
-if [ $partition_layout == "efi" ]; then
+if [[ "$partition_layout" == "efi" ]]; then
 
     # Format
     mkfs.fat -F32 $partition_boot
@@ -149,6 +118,7 @@ fi
 
 
 ### --- SOFTWARE ---
+print "------ Installing software"
 
 # Parallel downloads
 sed -i "37s/#//" /etc/pacman.conf
@@ -160,15 +130,18 @@ pacstrap /mnt $packages
 ### --- POST INSTALL ---
 
 ## fstab
+print "------ Generating fstab"
+
 genfstab -U /mnt >> /mnt/etc/fstab
 
 
 ## Post-install script
+print "------ Running post-install script"
 
 # Movement
-cp ./settings.sh /mnt/
-cp ./postinstall.sh /mnt/
-chmod +x /mnt/postinstall.sh
+mkdir -p /mnt/install
+cp ./{settings.sh,postinstall.sh,func.sh} /mnt/install
+chmod +x /mnt/install/*
 
 # Use script
 arch-chroot /mnt ./postinstall.sh

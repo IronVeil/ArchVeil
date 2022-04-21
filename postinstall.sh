@@ -18,50 +18,47 @@ echo -ne "
 
 ### --- VARIABLES ---
 source ./settings.sh
+source ./func.sh
 
 
 
 ### --- LOCALE ---
 
 ## Timezone
-echo
-echo "------ Setting timezone"
+print "------ Setting timezone"
 
 ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
 hwclock --systohc
 
 ## Lang
-echo
-echo "------ Setting locale"
+print "------ Setting locale"
 
-sed -i "s/#en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/" /etc/locale.gen
+sed -i "161s/#//" /etc/locale.gen
 locale-gen
 
-echo "LANG=en_GB.UTF-8" >> /etc/locale.conf
-echo "LC_COLLATE=C" >> /etc/locale.conf
+echo "LANG=en_GB.UTF-8
+LC_COLLATE=C" >> /etc/locale.conf
 echo "KEYMAP=uk" >> /etc/vconsole.conf
 
 
 
 ### --- HOST ---
-echo
-echo "------ Setting hostname"
+print "------ Setting hostname"
 
 ## Hostname
 echo $system_hostname >> /etc/hostname
 
 ## Hosts
-echo "127.0.0.1     localhost" >> /etc/hosts
-echo "::1           localhost" >> /etc/hosts
-echo "127.0.1.1     $system_hostname.localdomain    $system_hostname" >> /etc/hosts
+echo "127.0.0.1     localhost
+::1           localhost
+127.0.1.1     $system_hostname.localdomain    $system_hostname" >> /etc/hosts
 
 
 
 ### --- PACKAGES ---
 
 ## Pacman
-echo
-echo "------ Tweaking pacman"
+print "------ Tweaking pacman"
 
 # Color
 sed -i "33s/#//" /etc/pacman.conf
@@ -81,8 +78,7 @@ systemctl enable reflector.timer
 
 
 ## makepkg
-echo
-echo "------ Tweaking make"
+print "------ Tweaking make"
 
 # CFLAGS
 sed -i "41s/-march=x86_64 -mtune=generic/-march=native -mtune=native/" /etc/makepkg.conf
@@ -107,35 +103,32 @@ sed -i "151s/.zst//" /etc/makepkg.conf
 ### --- USERS ---
 
 ## Main
-echo
-echo "------ Setting up $system_user"
+print "------ Setting up $system_user"
 
 useradd -mG wheel $system_user
 echo -e "$system_pass\n$system_pass" | passwd $system_user
 
 # Autologin
-if [ $system_user_autologin == "true" ]; then
-    echo
-    echo "------ Setting up autologin for $system_user"
+if [[ $system_user_autologin ]]; then
+    print "------ Setting up autologin for $system_user"
 
+    # Enable autologin
     mkdir -p /etc/systemd/system/getty@tty1.service.d
-    echo "[Service]" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    echo "ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin $system_user"' - $TERM' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin $system_user"' - $TERM' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 fi
 
 
 ## Root
-echo
-echo "------ Setting up root"
+print "------ Setting up root"
 
 # Password
 echo -e "$system_root_pass\n$system_root_pass" | passwd root
 
 
 ## Sudo
-echo
-echo "------ Setting up sudo"
+print "------ Setting up sudo"
 
 # Edit file
 echo "root ALL=(ALL:ALL) ALL
@@ -143,13 +136,6 @@ echo "root ALL=(ALL:ALL) ALL
 @includedir /etc/sudoers.d
 Defaults pwfeedback
 Defaults insults" >> /etc/sudoers
-
-
-## Root
-echo
-echo "------ Setting up root"
-
-echo -e "$system_root_pass\n$system_root_pass" | passwd root
 
 
 
@@ -169,7 +155,7 @@ su -c "git clone https://aur.archlinux.org/yay.git" $system_user
 cd yay
 
 # Make
-echo -e "$system_pass" | su -c "makepkg -si" $system_user
+echo | su -c "makepkg -si" $system_user
 
 # Remove dir
 cd ../
@@ -179,7 +165,7 @@ rm -r yay
 ## Performance services
 
 # Installing
-su -c "yay -S --noconfirm --save --nocleanmenu --nodiffmenu ananicy-cpp irqbalance memavaild nohang preload prelockd uresourced" $system_user
+aur "ananicy-cpp irqbalance memavaild nohang preload prelockd uresourced"
 
 # Enabling
 systemctl disable systemd-oomd
@@ -188,57 +174,49 @@ systemctl enable ananicy-cpp irqbalance memavaild nohang preload prelockd uresou
 # Enable zram checking
 sed -i 's|zram_checking_enabled = False|zram_checking_enabled = True|g' /etc/nohang/nohang.conf
 
-# Enable need for sudo password
-sed -i '$d' /etc/sudoers
-
 
 ## Sound
 
 # Installing
-yay -S --noconfirm --save --nocleanmenu --nodiffmenu pipewire-pulse pipewire-jack lib32-pipewire-jack alsa-plugins alsa-firmware sof-firmware alsa-card-profiles
+aur "pipewire-pulse pipewire-jack lib32-pipewire-jack alsa-plugins alsa-firmware sof-firmware alsa-card-profiles"
 
 
 ## Fonts
 
 # Installing
-yay -S --noconfirm --save --nocleanmenu --nodiffmenu ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts
+aur "ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts"
 
 
 ## GUI tweaks
-if [ $system_desktop !- "none" ]; then
-    yay -S --noconfirm --save --nocleanmenu --nodiffmenu libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal
-fi
+[[ "$system_desktop" !- "none" ]] && aur "libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal"
+
+
+## Enable need for sudo password
+sed -i '$d' /etc/sudoers
 
 
 ### --- SERVICES ---
-echo
-echo "------ Enabling services"
+print "------ Enabling services"
 
 
 ## Networking
-if [[ $packages == *"networkmanager"* ]]; then
-    systemctl enable NetworkManager
-fi
+[[ "$packages" == *"networkmanager"* ]] && systemctl enable NetworkManager
 
 # DHCPCD
 systemctl enable dhcpcd
 
 # VPN
-if [ $system_vpn == "true" ]; then
-
-    # Install
-    yay -S --noconfirm --save --nocleanmenu --nodiffmenu mullvad-vpn-bin
-fi
+[[ "$system_vpn" == "true" ]] && aur "mullvad-vpn-bin"
 
 
 ## Login managers
 
 # GNOME
-if [ $system_desktop == "gnome" ]; then
+if [[ "$system_desktop" == "gnome" ]]; then
     systemctl enable gdm
 
 # Plasma
-elif [ $system_desktop == "plasma" ]; then
+elif [[ "$system_desktop" == "plasma" ]]; then
     systemctl enable sddm
 fi
 
@@ -246,54 +224,44 @@ fi
 ## Browser
 
 # Brave
-if [ $software_browser == "brave" ]; then
-    yay -S --noconfirm --save --nocleanmenu --nodiffmenu brave-bin
+if [[ "$software_browser" == "brave" ]]; then
+    aur "brave-bin"
 
 # Chrome
-elif [ $software_browser == "chrome" ]; then
-    yay -S --noconfirm --save --nocleanmenu --nodiffmenu google-chrome
+elif [[ "$software_browser" == "chrome" ]]; then
+    aur "google-chrome"
 fi
 
 
 ## pCloud
-if [ $software_pcloud == "true" ]; then
-    yay -S --noconfirm --save --nocleanmenu --nodiffmenu pcloud-drive
-fi
+[[ $software_pcloud ]] && aur "pcloud-drive"
 
 
 ## Extension manager
-if [ $system_desktop == "gnome" ]; then
-    yay -S --noconfirm --save --nocleanmenu --nodiffmenu extension-manager
-fi
+[[ "$system_desktop" == "gnome" ]] && aur "extension-manager"
 
 
 
 ### --- BOOTLOADER ---
 
 ## mkinitcpio
-echo
-echo "------ Modifying mkinitcpio"
+print "------ Modifying mkinitcpio"
 
 # Filesystem
-sed -i "7s/.*/MODULES=($partition_root_format)" /etc/mkinitcpio.conf
+sed -i "7s/.*/MODULES=($partition_root_format)/" /etc/mkinitcpio.conf
 
 # Encrypted
-if [ $crypt == "true" ]; then
-
-    # Add hooks
-    sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)" /etc/mkinitcpio.conf
-fi
+[[ $crypt ]] && sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /etc/mkinitcpio.conf
 
 # Rebuild kernel
 mkinitcpio -P
 
 
 ## Bootloader
-echo
-echo "------ Installing bootloader"
+print "------ Installing bootloader"
 
 ## systemd-boot
-if [ $system_bootloader == "systemd-boot" ]; then
+if [[ "$system_bootloader" == "systemd-boot" ]]; then
 
     # Install
     bootctl install
@@ -310,41 +278,27 @@ initrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
     uuid=$(blkid -o value -s UUID ${partition_root})
     
     # Root
-    if [ $crypt == "true" ]; then
+    if [[ $crypt ]]; then
         echo "options cryptdevice=${uuid}:${crypt_name} root=${crypt_partition} rw quiet splash" >> /boot/loader/entries/arch.conf
 
         # SSD TRIM support
-        if [ $disk_speed == "ssd" ]; then
-            sed -i "s/${crypt_name}/${crypt_name}:allow-discards"
-        fi
+        [[ "$disk_speed" == "ssd" ]] && sed -i "s/${crypt_name}/${crypt_name}:allow-discards/" /boot/loader/entries/arch.conf
 
     else
         echo "options root=UUID=$uuid rw quiet splash" >> /boot/loader/entries/arch.conf
     fi
 
 ## GRUB
-elif [ $system_bootloader == "grub" ]; then
+elif [[ "$system_bootloader" == "grub" ]]; then
 
     # Enable os-prober
     sed -i "63s/#//" /etc/default/grub
 
     # Toggle delay
-    if [ $system_grub_delay == "true" ]; then
-        sed -i "4s/5/0/" /etc/default/grub
-    fi
+    [[ $system_grub_delay ]] && sed -i "4s/5/0/" /etc/default/grub
 
     # EFI
-    if [ $partition_layout == "efi" ]; then
-
-        # Install
-        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-
-    # BIOS
-    elif [ $partition_layout == "bios" ]; then
-        
-        # Install
-        grub-install --target=i386-pc $disk_dir
-    fi
+    [[ "$partition_layout" == "efi" ]] && grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB || grub-install --target=i386-pc $disk_dir
 
     # Config
     grub-mkconfig -o /boot/grub/grub.cfg
