@@ -42,6 +42,7 @@ print "------ Partitioning $disk_name"
 
 ## Unmount
 umount /dev/${disk_name}*
+umount -R /mnt
 cryptsetup close $crypt_partition
 
 
