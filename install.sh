@@ -141,7 +141,7 @@ print "------ Running post-install script"
 # Movement
 mkdir -p /mnt/install
 cp ./{settings.sh,postinstall.sh,func.sh} /mnt/install
-chmod +x /mnt/install/*
+chmod -R +x /mnt/install/*
 
 # Use script
 arch-chroot /mnt ./postinstall.sh
