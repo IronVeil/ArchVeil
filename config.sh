@@ -622,12 +622,12 @@ wtf software_pcloud
 ## Export to file
 out="$packages"
 
+# Export to file
+wtf packages
+
 # Add quote marks
 sed -i 's|packages=|packages="|' ./settings.sh
 sed -i '/packages/ s/$/"/' ./settings.sh
-
-# Export to file
-wtf packages
 
 
 
