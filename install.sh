@@ -144,4 +144,4 @@ cp ./{settings.sh,postinstall.sh,func.sh} /mnt/install
 chmod -R +x /mnt/install/*
 
 # Use script
-arch-chroot /mnt ./postinstall.sh
+arch-chroot /mnt ./install/postinstall.sh
