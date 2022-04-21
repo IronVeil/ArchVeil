@@ -210,7 +210,7 @@ while $diskcheck; do
     for (( i=0; i<$len; i++ )); do
 
         # Matching
-        if [[ "/dev/{$out}" == "${disks[$i]}" ]]; then
+        if [[ "/dev/${out}" == "${disks[$i]}" ]]; then
             diskcheck=false
             break
         fi
