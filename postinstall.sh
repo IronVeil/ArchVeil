@@ -17,8 +17,8 @@ echo -ne "
 
 
 ### --- VARIABLES ---
-source ./settings.sh
-source ./func.sh
+source ./install/settings.sh
+source ./install/func.sh
 
 
 
@@ -188,7 +188,7 @@ aur "ttf-fira-code ttf-fira-sans noto-fonts noto-fonts-emoji ttf-ms-fonts"
 
 
 ## GUI tweaks
-[[ "$system_desktop" !- "none" ]] && aur "libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal"
+[[ "$system_desktop" != "none" ]] && aur "libappindicator-gtk3 appmenu-gtk-module xdg-desktop-portal"
 
 
 ## Enable need for sudo password
