@@ -19,15 +19,29 @@ echo -ne "
 ### --- FUNCTIONS ---
 
 ## Write to file
-writeToFile () {
-    sed -i "s|${1}=|${1}=${2}|" ./settings.sh
-}
+writeToFile () { sed -i "s|${1}=|${1}=${out}|" ./settings.sh; }
 
 
 ## Print
 print () {
     echo
     echo $1
+}
+
+
+## Lowercase
+lower () { out=${1,,}; }
+
+
+## Input
+input () {
+    local inp
+
+    # Prompt
+    read -p "$1" inp
+
+    # Lowercase it
+    [[ "$2" == "1" ]] && lower $inp || out=$inp
 }
 
 
@@ -48,51 +62,51 @@ print "Please enter the name of the new system."
 while true; do
     
     # User input
-    read -p "Name: " system_hostname
+    input "Hostname: "
 
     # Validation
-    [[ ! -z "$system_hostname" ]] && break
+    [[ ! -z "$out" ]] && break
 
 done
 
 # Export to file
-writeToFile system_hostname $system_hostname
+writeToFile system_hostname
 
 
 
 ### --- USER ---
-echo
-echo "Please enter your username."
+print "Please enter your username."
 
 while true; do
 
     # User input
-    read -p "Username: " system_user
-    system_user=${system_user,,}
+    input "Username: " 1
 
     # Validation
-    [[ ! -z "$system_user" ]] && break
+    [[ ! -z "$out" ]] && break
 
 done
 
+# Create system_user variable
+system_user=$out
+
 # Export to file
-writeToFile system_user $system_user
+writeToFile system_user
 
 
 ## Password
-echo
-echo "Please enter your password."
+print "Please enter ${system_user}'s password."
 
 while true; do
 
     # User input
-    read -p "Password: " -s system_pass
+    read -p "Password: " -s out
     echo
-    read -p "Confirm Password: " -s system_pass2
+    read -p "Confirm Password: " -s out2
     echo
 
     # Validation
-    if [ $system_pass == $system_pass2 ] && [[] ! -z "$system_pass" ]]; then
+    if [[ "$out" == "$out2" ]] && [[ ! -z "$out2" ]]; then
         break
     else
         echo "Passwords are not the same, try again."
@@ -100,82 +114,66 @@ while true; do
 done
 
 # Export to file
-writeToFile system_pass $system_pass
+writeToFile system_pass
 
 
 ## Autologin
-echo
-echo "Do you want $system_user to autologin?"
+print "Do you want $system_user to autologin?"
 
 # User input
-read -p "(y/N) " system_user_autologin
-system_user_autologin=${system_user_autologin,,}
+input "(y/N) " 1
 
-# Autologin
-if [ $system_user_autologin == "y" ]; then
-    system_user_autologin=true
-
-    break
-
-# Manual login
-else
-    system_user_autologin=false
-
-    break
-fi
+# Autologin or not
+[[ "$out" == "y" ]] && out=true || out=false
 
 # Export to file
-writeToFile system_user_autologin $system_user_autologin
+writeToFile system_user_autologin
 
 
 ## Root password
-echo
-echo "Do you want the root password to be the same as the user password?"
+print "Do you want the root password to be the same as ${system_user}'s password?"
 
 # User input
-read -p "(Y/n) " root_same
-root_same=${root_same,,}
+input "(Y/n) " 1
 
 # Password input
-if [ $root_same == "n" ]; then
+if [[ "$out" == "n" ]]; then
 
     while true; do
 
         # User input
-        read -p "Password: " -s system_root_pass
+        read -p "Password: " -s out
         echo
-        read -p "Confirm Password: " -s system_root_pass2
+        read -p "Confirm Password: " -s out2
         echo
 
         # Validation
-        if [ $system_root_pass == $system_root_pass2 ] && [[ ! -z "$system_root_pass" ]]; then
+        if [[ "$out" == "$out2" ]] && [[ ! -z "$out2" ]]; then
             break
         else
-            echo "Passwords are not the same, try again."
+            print "Passwords are not the same, try again."
         fi
     done
 else
-    system_root_pass=$system_pass
+    out=$system_pass
 fi
 
 # Export to file
-writeToFile system_root_pass $system_root_pass
+writeToFile system_root_pass
 
 
 
 ### --- VM ---
-echo
-echo "Is this a VM?"
+print "Is this a VM?"
 
 # User input
-read -p "(y/N) " system_vm
-system_vm=${system_vm,,}
+input "(y/N) " 1
 
 # VM or bare metal
-[ $system_vm == "y" ] && system_vm=true || system_vm=false
+[[ "$out" == "y" ]] && out=true || out=false
 
 # Export to file
-writeToFile system_vm $system_vm
+writeToFile system_vm
 
 
 
