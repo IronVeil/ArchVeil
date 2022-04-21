@@ -295,12 +295,13 @@ fi
 ## EFI or BIOS
 [[ -d /sys/firmware/efi ]] && out=efi || out=bios
 
+# Sets partition_layout as a variable
+partition_layout=$out
+
 # Export to file
 wtf partition_layout
 
 # Partitions
-#partition_bios=false
-#partition_boot=false
 
 # EFI system
 if [[ "$out" == "efi" ]] && [[ "$disk_name" == "nvme" ]]; then
@@ -319,6 +320,9 @@ input "(E/b) " 1
 
 # EXT4 or BTRFS
 [[ "$out" == "b" ]] && out=btrfs || out=ext4
+
+# Sets partition_root_format
+partition_root_format=$out
 
 # Export to file
 wtf partition_root_format
@@ -374,351 +378,252 @@ wtf system_kernel
 # CPU
 cpu=$(grep -m 1 'model name' /proc/cpuinfo)
 
-# AMD
-if [[ $cpu == *"AMD"* ]]; then
-    system_cpu="amd"
-
-# Intel
-elif [[ $cpu == *"Intel"* ]]; then
-    system_cpu="intel"
-fi
+# Sets to correct brand
+[[ "$cpu" == *"AMD"* ]] && out="amd" || out="intel"
 
 # Install
-packages+=" ${system_cpu}-ucode"
+packages+=" ${out}-ucode"
 
 # Export to file
-sed -i "s/system_cpu=.*/system_cpu=$system_cpu/" ./settings.sh
+wtf system_cpu
 
 
 ## Bootloader
 
 # BIOS
-if [ $partition_layout == "bios" ]; then
-    packages+="grub os-prober"
-    system_bootloader="grub"
+if [[ "$partition_layout" == "bios" ]]; then
+    out="grub"
 
 # EFI
-elif [ $partition_layout == "efi" ]; then
+elif [[ "$partition_layout" == "efi" ]]; then
 
-    echo
-    echo "Which bootloader do you want?"
-    echo "1) systemd-boot"
-    echo "2) GRUB"
+    print "Do you want systemd-boot or GRUB?"
 
-    while true; do
+    # User input
+    input "(s/G) " 1
 
-        # User input
-        read -p "(1/2) " system_bootloader
-
-        # systemd-boot
-        if [ $system_bootloader == "1" ]; then
-            system_bootloader="systemd-boot"
-            break
-
-        # GRUB
-        elif [ $system_bootloader == "2" ]; then
-            system_bootloader="grub"
-            packages+=" grub os-prober efibootmgr"
-
-            break
-        fi
-    done
+    [[ "$out" == "s" ]] && out="systemd-boot" || out="grub"
 fi
-
-# GRUB Timeout
-if [ $system_bootloader == "grub" ]; then
-    echo
-    echo "Do you want a 5 second delay to select other operating systems?"
-
-    while true; do
-        read -p "(Y/N) " system_grub_delay
-        system_grub_delay=${system_grub_delay,,}
-
-        # Delay
-        if [ $system_grub_delay == "y" ]; then
-            system_grub_delay=true
-            break
-
-        # No delay
-        elif [ $system_grub_delay == "n" ]; then
-            system_grub_delay=false
-            break
-        fi
-    done
-fi
-
 
 # Export to file
-sed -i "s/system_bootloader=.*/system_bootloader=$system_bootloader/" ./settings.sh
-sed -i "s/system_grub_delay=.*/system_grub_delay=$system_grub_delay/" ./settings.sh
+wtf system_bootloader
+
+# GRUB stuff
+if [[ "$out" == "grub" ]]; then
+
+    # Delay
+    print "Do you want a 5 second delay to select other operating systems?"
+    
+    # User input
+    input "(Y/n) " 1
+
+    # Enable or disable delay
+    [[ "$out" == "n" ]] && out=false || out=true
+
+    # Export to file
+    wtf system_grub_delay
+fi
 
 
 ## BTRFS
-if [ $partition_root_format == "btrfs" ]; then
-    packages+=" btrfs-progs"
-fi
+[[ "$system_root_format" == "btrfs" ]] && packages+=" btrfs-progs"
 
 
 ## Network
-echo
-echo "Do you want Wi-Fi through NetworkManager?"
+print "Do you want Wi-Fi through NetworkManager?"
 
-while true; do
+# User input
+input "(Y/n) " 1
 
-    # User input
-    read -p "(Y/N) " package_network
-    package_network=${package_network,,}
-
-    # Wi-Fi
-    if [ $package_network == "y" ]; then
-        packages+=" networkmanager"
-        break
-    
-    # Ethernet
-    elif [ $package_network == "n" ]; then
-        break
-    fi
-done
-
-# Ethernet
+# Installs DHCPCD
 packages+=" dhcpcd"
+
+# Installs networkmanager if needed
+[[ "$out" == "n" ]] || packages+=" networkmanager"
 
 
 ## VPN
-echo
-echo "Do you want to install Mullvad?"
+print "Do you want to install Mullvad?"
 
-while true; do
+# User input
+input "(y/N) " 1
 
-    # User input
-    read -p "(Y/N) " system_vpn
-    system_vpn=${system_vpn}
-
-    # Install vpn
-    if [ $system_vpn == "y" ]; then
-        system_vpn="true"
-
-        break
-    elif [ $system_vpn == "n" ]; then
-        system_vpn="false"
-
-        break
-    fi
-done
+# Toggles to install or not
+[[ "$out" == "y" ]] && out=true || out=false
 
 # Export to file
-sed -i "s/system_vpn=.*/system_vpn=$system_vpn/" ./settings.sh
+wtf system_vpn
 
 
 ## Editor
-echo
-echo "Which editor do you want?"
-echo "1) neovim"
+print "Which editor do you want?"
+echo "1) neovim *"
 echo "2) vim"
 echo "3) nano"
 
-while true; do
+# User input
+input "(1-3) "
 
-    # User input
-    read -p "(1-3) " package_editor
-
-    # neovim
-    if [ $package_editor == "1" ]; then
-        packages+=" neovim"
-        break
+# Selects editor
+case $out in
 
     # vim
-    elif [ $package_editor == "2" ]; then
+    2)
         packages+=" vim"
-        break
+        ;;
 
     # nano
-    elif [ $package_editor == "3" ]; then
+    3)
         packages+=" nano"
-        break
-    fi
-done
+        ;;
+    
+    # neovim
+    *)
+        packages+=" neovim"
+        ;;
+esac
 
 
 ## VScode
-echo
-echo "Do you want VS Code?"
+print "Do you want VS Code?"
 
-while true; do
-    
-    # User input
-    read -p "(Y/N) " software_vscode
-    software_vscode=${software_vscode,,}
+# User input
+input "(y/N) " 1
 
-    if [ $software_vscode == "y" ]; then
-        software_vscode="true"
-        
-        break
-    elif [ $software_vscode == "n" ]; then
-        software_vscode="false"
-
-        break
-    fi
-done
+# Selects to install or not
+[[ "$out" == "y" ]] && out=true || out=false
 
 # Export to file
-sed -i "s/software_vscode=.*/software_vscode=$software_vscode/" ./settings.sh
+wtf software_vscode
+
 
 
 ## Desktop envirnoment
-echo
-echo "Which desktop environment do you want?"
-echo "1) None"
+print "Which desktop environment do you want?"
+echo "1) None *"
 echo "2) GNOME"
 echo "3) Cinnamon"
 echo "4) KDE Plasma"
 echo "5) XFCE"
 
-while true; do
+# User input
+input "(1-5) "
 
-    # User input
-    read -p "(1-5) " system_desktop
+# Selects which DE
+case $out in
 
-    # None
-    if [ $system_desktop == "1" ]; then
-        system_desktop="none"
-        break
-    
     # GNOME
-    elif [ $system_desktop == "2" ]; then
-        system_desktop="gnome"
-
-        # Install
+    2)
+        out=gnome
         packages+=" gnome gnome-terminal nautilus python-nautilus gnome-tweak-tool gdm"
-
-        break
+        ;;
 
     # Plasma
-    elif [ $system_desktop == "4" ]; then
-        system_desktop="plasma"
-
-        # Install
+    4)
+        out=plasma
         packages+=" plasma sddm konsole kalendar dolphin"
+        ;;
 
-        break
-    fi
-done
+    # None
+    *)
+        out=none
+        ;;
+esac
+
+# Sets system_desktop as a variable
+system_desktop=$out
+
+# Export to file
+wtf system_desktop
 
 
 ## Desktop server
-if [ $system_desktop != "none" ] ; then
-    echo
-    echo "Do you want X.ORG or Wayland?"
+if [[ "$out" != "none" ]] ; then
+    print "Do you want X.ORG or Wayland?"
 
-    while true; do
+    # User input
+    input "(x/W) " 1
 
-        # User input
-        read -p "(X/W) " system_server
-        system_server=${system_server,,}
+    # X.ORG
+    if [[ "$out" == "x" ]]; then
+        out="xorg"
+        packages+=" xorg"
 
-        # X.ORG
-        if [ $system_server == "x" ]; then
-            system_server="xorg"
-            packages+=" xorg"
+    # Wayland
+    else
+        out="wayland"
+        packages+=" wayland"
 
-        # Wayland
-        elif [ $system_server == "w" ]; then
-            system_server="wayland"
-            packages+=" wayland"
-
-            # KDE
-            if [ $system_desktop == "plasma" ]; then
-                packages+=" plasma-wayland-session"
-            fi
+        # KDE
+        if [[ "$system_desktop" == "plasma" ]]; then
+            packages+=" plasma-wayland-session"
         fi
-    done
-fi
+    fi
 
-# Export to file
-sed -i "s/system_desktop=.*/system_desktop=$system_desktop/" ./settings.sh
-sed -i "s/system_server=.*/system_server=$system_server/" ./settings.sh
+    # Export to file
+    wtf system_server
+fi
 
 
 ## Browser
-echo
-echo "What browser do you want?"
+print "What browser do you want?"
+
 echo "1) None"
-echo "2) Firefox"
+echo "2) Firefox *"
 echo "3) Brave"
 echo "4) Google Chrome"
 
-while true; do
+# User input
+input "(1-4) "
 
-    # User input
-    read -p "(1-4) " software_browser
+# Select browser
+case $out in
 
     # None
-    if [ $software_browser == "1" ]; then
-        software_browser="none"
+    1)
+        out=none
+        ;;
 
-        break
-    
-    # Firefox
-    elif [ $software_browser == "2" ]; then
-        software_browser="firefox"
-
-        # Install
-        packages+=" firefox"
-
-        break
-    
     # Brave
-    elif [ $software_browser == "3" ]; then
-        software_browser="brave"
-
-        break
+    3)
+        out=brave
+        ;;
     
     # Chrome
-    elif [ $software_browser == "4" ]; then
-        software_browser="chrome"
+    4)
+        print "Please re-evaluate your life choices"
+        out=chrome
+        ;;
 
-        # Insult
-        echo
-        echo "Please reevaluate your life choices."
-
-        break
-    fi
-done
+    # Firefox
+    *)
+        out=firefox
+        packages+=" firefox"
+        ;;
+esac
 
 # Export to file
-sed -i "s/software_browser=.*/software_browser=$software_browser/" ./settings.sh
+wtf software_browser
 
 
 ## pCloud
-echo
-echo "Do you want pCloud to manage files?"
+print "Do you want pCloud to manage files?"
 
-while true; do
+# User input
+input "(Y/n) " 1
 
-    # User input
-    read -p "(Y/N) " $software_pcloud
-    software_pcloud=${software_pcloud,,}
-
-    # pCloud
-    if [ $software_pcloud == "y" ]; then
-        software_pcloud="true"
-
-        break
-    
-    # No pCloud
-    elif [ $software_pcloud == "n" ]; then
-        software_pcloud="false"
-
-        break
-    fi
-done
+# Installs pCloud or not
+[[ "$out" == "n" ]] && out=false || out=true
 
 # Export to file
-sed -i "s/software_pcloud=.*/software_pcloud=$software_pcloud/" ./settings.sh
+wtf software_pcloud
 
 
 ## Export to file
-sed -i "s/packages=.*/packages='$packages'/" ./settings.sh
+out=$packages
+wtf packages
+
+
 
 ### --- INSTALL ---
 ./install.sh
