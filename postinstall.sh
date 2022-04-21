@@ -251,7 +251,7 @@ print "------ Modifying mkinitcpio"
 sed -i "7s/.*/MODULES=($partition_root_format)/" /etc/mkinitcpio.conf
 
 # Encrypted
-[[ "$crypt" == "true" ]] && sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /etc/mkinitcpio.conf
+[[ "$crypt" == "true" ]] && sed -i "52s/.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems fsck)/" /etc/mkinitcpio.conf
 
 # Rebuild kernel
 mkinitcpio -P
@@ -279,7 +279,7 @@ initrd /initramfs-${system_kernel}.img" >> /boot/loader/entries/arch.conf
     
     # Root
     if [[ "$crypt" == "true" ]]; then
-        echo "options cryptdevice=${uuid}:${crypt_name} root=${crypt_partition} rw quiet splash" >> /boot/loader/entries/arch.conf
+        echo "options cryptdevice=UUID=${uuid}:${crypt_name} root=${crypt_partition} rw quiet splash" >> /boot/loader/entries/arch.conf
 
         # SSD TRIM support
         [[ "$disk_speed" == "ssd" ]] && sed -i "s/${crypt_name}/${crypt_name}:allow-discards/" /boot/loader/entries/arch.conf
